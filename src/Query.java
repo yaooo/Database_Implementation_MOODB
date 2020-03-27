@@ -8,7 +8,7 @@ public class Query {
     private HashMap<Double, double[]> aggs_groupby;
     private double[] aggs;
 
-    private ArrayList<String> fields;
+    private ArrayList<String> outputFieldNames;
     private String GroupBy_Field;
 
     private final static int GROUPBYQUERY = 1;
@@ -19,9 +19,9 @@ public class Query {
         this.GroupBy_Field = "";
         this.query = s;
         this.type = QueryType(s);
-        this.fields = new ArrayList<>();
+        this.outputFieldNames = new ArrayList<>();
         this.parse();
-        this.fieldSize = fields.size();
+        this.fieldSize = outputFieldNames.size();
         this.aggs_groupby = new HashMap<>();
         this.aggs = new double[fieldSize];
     }
@@ -44,7 +44,7 @@ public class Query {
         }
     }
 
-    ArrayList<String> getFields(){return fields;}
+    ArrayList<String> getFields(){return outputFieldNames;}
 
     int getFieldSize(){return fieldSize;}
 
@@ -78,7 +78,7 @@ public class Query {
     private void parse(){
         String theString = this.query.replace(';', ' ');
         int addField = 0;
-        StringTokenizer st=new StringTokenizer(theString," ,");
+        StringTokenizer st = new StringTokenizer(theString," ,");
         while (st.hasMoreTokens()){
             String theToken=st.nextToken();
 
@@ -91,14 +91,14 @@ public class Query {
                 addField = 2;
                 continue;
             }
-            if(addField == 0) this.fields.add(theToken);
+            if(addField == 0) this.outputFieldNames.add(theToken);
             if(addField == 2) this.GroupBy_Field = theToken;
 //            System.out.println("Type:" + addField + "--"+ theToken);
         }
     }
 
     public void printQueryParser(){
-        System.out.println(fields.toString());
+        System.out.println(outputFieldNames.toString());
         if(this.type == GROUPBYQUERY)
             System.out.println(GroupBy_Field);
     }

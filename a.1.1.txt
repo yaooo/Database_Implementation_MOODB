@@ -1,0 +1,87 @@
+Trie(file){
+	// init root
+	depth <- the number of attributes in the schema
+	readData(file)  // read data file line by line and insert tuples into the trie
+}
+
+readData(file){
+	for each line in the file{
+		tuple <- parse each line as an array
+		insert(tuple)
+	}
+}
+
+insert(tuple){
+	TrieNode current <- Trie.root
+	for(attribute <- tuple){
+		if(current.children does not contain attribute as its key){
+			// add attribute as a new key in current.children
+		}
+		current <- current.children.get(attribute)
+	}	
+}
+
+
+// parse SQL aggregates and store them in a list
+evaluate1(){
+	// init array with its size = Trie.depth
+    traverse1(Trie.root, 0, array);
+    // print out the computational results for each query
+}
+
+traverse1(root, level, array){
+    if(reach the bottom of the trie){
+        for(query <- querie_list){
+            // perform calculation
+        }
+        return;
+    }
+    map <- root.children
+    for(key : map.keySet){
+        Trie.TrieNode next = map.get(key);
+        if(next != null){
+            array[level] = key;
+            traverse1(next, level + 1, str);
+        }
+    }
+}
+
+
+//q1.1.3
+
+// init aggs_gb_A & aggs_gb_B && aggs_gb_C && aggs
+
+// init array
+
+for (r_A <- R_TRIE){
+	array[0] = r_A.A
+	
+	for(r_B <- r_A.LIST){
+		array[1] = r_B.B
+		
+		for(r_C <- r_B.LIST){
+			array[2] = r_C.C
+
+			aggs_gb_A[array[0]][0] += 1
+			aggs_gb_A[array[0]][1] += array[1]
+			aggs_gb_A[array[0]][2] += array[2]
+
+			aggs_gb_C[array[2]][0] += 1	
+			aggs_gb_C[array[2]][1] += array[0]
+			aggs_gb_C[array[2]][2] += array[1]	
+
+			aggs_gb_C[array[2]][0] += 1
+			aggs_gb_C[array[2]][1] += array[0]
+			aggs_gb_C[array[2]][2] += array[1]
+
+			aggs[0] += 1					
+			aggs[1] += array[0]		
+			aggs[2] += array[1]				
+			aggs[3] += array[2]				
+			aggs[4] += array[0] * array[1]		
+			aggs[5] += array[0] * array[2]	
+			aggs[6] += array[1] * array[2]					
+			
+		}
+	}
+}

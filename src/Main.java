@@ -3,7 +3,7 @@ import java.util.*;
 public class Main {
 
     // modify this variable for other csv files
-    private final static String FILENAME = "dataset/sf1.csv";
+    private final static String FILENAME = "dataset/sf20.csv";
     private final static String[] attributes = new String[]{"A", "B", "C", "D", "E"};
 
 
