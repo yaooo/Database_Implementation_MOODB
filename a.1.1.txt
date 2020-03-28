@@ -85,3 +85,76 @@ for (r_A <- R_TRIE){
 		}
 	}
 }
+
+independent:
+do sum(A) for each tuple
+do sum(1) for each tuple
+
+for each tuple:
+    sum(1)
+    sum(A)
+
+
+
+Testing results:
+
+EXECUTING FILE: dataset/sf1.csv
+Evaluate the query batch, run time: 442ms.
+Evaluate the query independently, run time: 308ms.
+EXECUTING FILE: dataset/sf2.csv
+Evaluate the query batch, run time: 653ms.
+Evaluate the query independently, run time: 716ms.
+EXECUTING FILE: dataset/sf3.csv
+Evaluate the query batch, run time: 977ms.
+Evaluate the query independently, run time: 817ms.
+EXECUTING FILE: dataset/sf4.csv
+Evaluate the query batch, run time: 1215ms.
+Evaluate the query independently, run time: 1139ms.
+EXECUTING FILE: dataset/sf5.csv
+Evaluate the query batch, run time: 1486ms.
+Evaluate the query independently, run time: 1405ms.
+EXECUTING FILE: dataset/sf6.csv
+Evaluate the query batch, run time: 1920ms.
+Evaluate the query independently, run time: 1666ms.
+EXECUTING FILE: dataset/sf7.csv
+Evaluate the query batch, run time: 2177ms.
+Evaluate the query independently, run time: 1947ms.
+EXECUTING FILE: dataset/sf8.csv
+Evaluate the query batch, run time: 2308ms.
+Evaluate the query independently, run time: 2195ms.
+EXECUTING FILE: dataset/sf9.csv
+Evaluate the query batch, run time: 2745ms.
+Evaluate the query independently, run time: 2494ms.
+EXECUTING FILE: dataset/sf10.csv
+Evaluate the query batch, run time: 3074ms.
+Evaluate the query independently, run time: 2824ms.
+EXECUTING FILE: dataset/sf11.csv
+Evaluate the query batch, run time: 3481ms.
+Evaluate the query independently, run time: 3113ms.
+EXECUTING FILE: dataset/sf12.csv
+Evaluate the query batch, run time: 3943ms.
+Evaluate the query independently, run time: 3491ms.
+EXECUTING FILE: dataset/sf13.csv
+Evaluate the query batch, run time: 4335ms.
+Evaluate the query independently, run time: 3811ms.
+EXECUTING FILE: dataset/sf14.csv
+Evaluate the query batch, run time: 4713ms.
+Evaluate the query independently, run time: 4156ms.
+EXECUTING FILE: dataset/sf15.csv
+Evaluate the query batch, run time: 4962ms.
+Evaluate the query independently, run time: 4433ms.
+EXECUTING FILE: dataset/sf16.csv
+Evaluate the query batch, run time: 5405ms.
+Evaluate the query independently, run time: 4677ms.
+EXECUTING FILE: dataset/sf17.csv
+Evaluate the query batch, run time: 5609ms.
+Evaluate the query independently, run time: 5082ms.
+EXECUTING FILE: dataset/sf18.csv
+Evaluate the query batch, run time: 6025ms.
+Evaluate the query independently, run time: 5363ms.
+EXECUTING FILE: dataset/sf19.csv
+Evaluate the query batch, run time: 6421ms.
+Evaluate the query independently, run time: 5752ms.
+EXECUTING FILE: dataset/sf20.csv
+Evaluate the query batch, run time: 6922ms.
+Evaluate the query independently, run time: 6176ms.

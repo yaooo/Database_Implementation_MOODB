@@ -1,15 +1,15 @@
 import java.util.List;
-public class Schema {
+public class NaiveSchema {
 
-    private Trie trie;
+    private NaiveStorage naiveDB;
     private List<String> attributeOrder;
 
-    Schema(String fileName, List<String> attrs){
+    NaiveSchema(String fileName, List<String> attrs){
         attributeOrder = attrs; // EX: <A, B, C, D>
-        trie = new Trie(fileName, attributeOrder.size());
+        naiveDB = new NaiveStorage(fileName, attributeOrder.size());
     }
 
-    Trie getTrie(){return trie;}
+    NaiveStorage getNaiveStorage(){return naiveDB;}
 
     List<String> getAttributeOrder(){
         return attributeOrder;

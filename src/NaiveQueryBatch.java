@@ -1,13 +1,14 @@
 import java.awt.*;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class QueryBatch {
+public class NaiveQueryBatch {
     private ArrayList<Query> queries;
-    private Schema schema;
+    private NaiveSchema schema;
     private int depth;
 
-    public QueryBatch(Schema schema){
+    public NaiveQueryBatch(NaiveSchema schema){
         this.schema = schema;
         this.depth = this.schema.getAttributeOrder().size();
         queries = new ArrayList<>();
@@ -22,34 +23,35 @@ public class QueryBatch {
 
     ArrayList<Query> getQueries(){return queries;}
 
-    void evaluate1(){
+    void evaluateBatch(){
         long c = System.currentTimeMillis();
-        traverse1(this.schema.getTrie().getRoot(), 0, new double[depth] );
-//        for(Query q: this.queries) {
+        NaiveStorage storage = schema.getNaiveStorage();
+        for(double[] d : storage.getRoot()) {
+            for (Query q : this.queries) {
+                operation(q, d);
+            }
+        }
+//        for (Query q : this.queries) {
 //            q.printResult();
 //        }
-        System.out.println("Evaluate (MoonDB--version 1), run time: " + (System.currentTimeMillis() - c) + "ms." );
+        System.out.println("Evaluate the query batch, run time: " + (System.currentTimeMillis() - c) + "ms." );
+
     }
 
-
-
-    private void traverse1(Trie.TrieNode root, int level, double[] str){
-
-        if(root == null || root.getChildren() == null || root.getChildren().isEmpty()){
-            for(Query q: this.queries){
-                operation(q, str);            // perform calculation
-            }
-            return;
-        }
-
-        for(double key: root.getChildren().keySet()){
-            Trie.TrieNode next = root.getChildren().get(key);
-            if(next != null){
-                str[level] = key;
-                traverse1(next, level + 1, str);
+    void evaluateIndepently(){
+        long c = System.currentTimeMillis();
+        NaiveStorage storage = schema.getNaiveStorage();
+        for (Query q : this.queries) {
+            for(double[] d : storage.getRoot()) {
+                operation(q, d);
             }
         }
+//        for (Query q : this.queries) {
+//            q.printResult();
+//        }
+        System.out.println("Evaluate the query independently, run time: " + (System.currentTimeMillis() - c) + "ms." );
     }
+
 
 
     private void operation(Query query, double[] str){
