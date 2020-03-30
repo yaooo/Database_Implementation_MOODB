@@ -15,6 +15,10 @@ public class Schema {
         return attributeOrder;
     }
 
+    String getLastAttribute(){
+        return attributeOrder.get(attributeOrder.size()-1);
+    }
+
     /* return -1 if not found*/
     int fieldIndex(String s){
         return attributeOrder.indexOf(s);

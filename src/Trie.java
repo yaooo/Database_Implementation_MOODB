@@ -17,13 +17,6 @@ class Trie {
     private int depth;
     private long size; // directly return sum(1)
 
-    Trie(String fileName) {
-        root = new TrieNode();
-        depth = 0;
-        size = 0;
-        readData(fileName);
-    }
-
     Trie(String fileName, int depth) {
         root = new TrieNode();
         this.depth = depth;
@@ -86,7 +79,7 @@ class Trie {
             if(next != null){
                 str[level] = key;
                 display(next, level + 1, str);
-                System.out.println("level-->" + level + Arrays.toString(str));
+//                System.out.println("level-->" + level + Arrays.toString(str));
             }
         }
     }

@@ -2,12 +2,12 @@ import java.util.ArrayList;
 
 public class NaiveQueryBatch {
     private ArrayList<Query> queries;
-    public NaiveSchema schema;
-    private int depth;
+    private NaiveSchema schema;
+//    private int depth;
 
-    public NaiveQueryBatch(NaiveSchema schema){
+    NaiveQueryBatch(NaiveSchema schema){
         this.schema = schema;
-        this.depth = this.schema.getAttributeOrder().size();
+//        this.depth = this.schema.getAttributeOrder().size();
         queries = new ArrayList<>();
     }
 
@@ -30,26 +30,26 @@ public class NaiveQueryBatch {
                 operation(q, d);
             }
         }
-        for (Query q : this.queries) {
-            q.printResult();
-        }
+//        for (Query q : this.queries) {
+//            q.printResult();
+//        }
         System.out.println("Evaluate the query batch, run time: " + (System.currentTimeMillis() - c) + "ms." );
 
     }
 
     void evaluateIndepently(){
-        resetQueries();
-        long c = System.currentTimeMillis();
-        NaiveStorage storage = schema.getNaiveStorage();
-        for (Query q : this.queries) {
-            for(double[] d : storage.getRoot()) {
-                operation(q, d);
-            }
-        }
-        for (Query q : this.queries) {
-            q.printResult();
-        }
-        System.out.println("Evaluate the query independently, run time: " + (System.currentTimeMillis() - c) + "ms." );
+//        resetQueries();
+//        long c = System.currentTimeMillis();
+//        NaiveStorage storage = schema.getNaiveStorage();
+//        for (Query q : this.queries) {
+//            for(double[] d : storage.getRoot()) {
+//                operation(q, d);
+//            }
+//        }
+//        for (Query q : this.queries) {
+//            q.printResult();
+//        }
+//        System.out.println("Evaluate the query independently, run time: " + (System.currentTimeMillis() - c) + "ms." );
     }
 
 
@@ -97,7 +97,7 @@ public class NaiveQueryBatch {
 
     private void resetQueries(){
         for(Query q: this.queries){
-            q.reset();
+            q.resetQuery();
         }
     }
 

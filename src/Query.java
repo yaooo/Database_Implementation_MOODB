@@ -17,9 +17,6 @@ public class Query {
     final static int GROUPBYQUERY = 1;
     final static int GENERALQUERY = 0;
 
-    void clear_partial (){
-        this.par_aggs = new double[fieldSize];
-    }
 
     Query(String s){
         s = s.toUpperCase();
@@ -29,14 +26,19 @@ public class Query {
         this.outputFieldNames = new ArrayList<>();
         this.parse();
         this.fieldSize = outputFieldNames.size();
-        reset();
+        resetQuery();
     }
 
-    public void reset(){
+    void resetQuery(){
         this.aggs_groupby = new HashMap<>();
         this.aggs = new double[fieldSize];
         this.par_aggs = new double[fieldSize];
     }
+
+    void resetPartial (){
+        this.par_aggs = new double[fieldSize];
+    }
+
 
     /**
      * For example: aggs_gb_A[A][0] += par_aggs_gb_A[0]
@@ -44,10 +46,13 @@ public class Query {
      **/
     void updateField(double key, int index, double increment, boolean ifSet){
 
-
         if(type == GROUPBYQUERY) {
             double[] fields = (aggs_groupby.containsKey(key)) ? aggs_groupby.get(key) : new double[fieldSize];
-            fields[index] = ifSet ? increment: fields[index] + increment;
+            if(!ifSet){
+                fields[index] += increment;
+            }else{
+                fields[index] = key;
+            }
             aggs_groupby.put(key, fields);
         }
         if(type == GENERALQUERY){
@@ -65,11 +70,9 @@ public class Query {
 
     void printResult(){
         System.out.println("\nResult of " + this.query);
-        StringBuilder sb = new StringBuilder();
-        int count = 0;
         if(type == GROUPBYQUERY){
             for(double key: aggs_groupby.keySet()){
-                System.out.println(Arrays.toString(aggs_groupby.get(key)));
+                System.out.println("key" + key +","+Arrays.toString(aggs_groupby.get(key)));
             }
         }
         if(type == GENERALQUERY){
