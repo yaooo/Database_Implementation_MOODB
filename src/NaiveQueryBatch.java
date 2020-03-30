@@ -1,11 +1,8 @@
-import java.awt.*;
-import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class NaiveQueryBatch {
     private ArrayList<Query> queries;
-    private NaiveSchema schema;
+    public NaiveSchema schema;
     private int depth;
 
     public NaiveQueryBatch(NaiveSchema schema){
@@ -16,6 +13,7 @@ public class NaiveQueryBatch {
 
     // read all queries
     void readQueries(ArrayList<String> queries){
+        this.queries.clear();
         for(String s: queries){
             this.queries.add(new Query(s));
         }
@@ -24,6 +22,7 @@ public class NaiveQueryBatch {
     ArrayList<Query> getQueries(){return queries;}
 
     void evaluateBatch(){
+        resetQueries();
         long c = System.currentTimeMillis();
         NaiveStorage storage = schema.getNaiveStorage();
         for(double[] d : storage.getRoot()) {
@@ -31,14 +30,15 @@ public class NaiveQueryBatch {
                 operation(q, d);
             }
         }
-//        for (Query q : this.queries) {
-//            q.printResult();
-//        }
+        for (Query q : this.queries) {
+            q.printResult();
+        }
         System.out.println("Evaluate the query batch, run time: " + (System.currentTimeMillis() - c) + "ms." );
 
     }
 
     void evaluateIndepently(){
+        resetQueries();
         long c = System.currentTimeMillis();
         NaiveStorage storage = schema.getNaiveStorage();
         for (Query q : this.queries) {
@@ -46,9 +46,9 @@ public class NaiveQueryBatch {
                 operation(q, d);
             }
         }
-//        for (Query q : this.queries) {
-//            q.printResult();
-//        }
+        for (Query q : this.queries) {
+            q.printResult();
+        }
         System.out.println("Evaluate the query independently, run time: " + (System.currentTimeMillis() - c) + "ms." );
     }
 
@@ -74,11 +74,10 @@ public class NaiveQueryBatch {
             } else {
                 // assume only one letter is selected, for example： select A, B, C from R
                 increment = str[schema.fieldIndex(op)];
-//                System.out.println("Select A:"+ increment);
                 ifSet = true;
 
             }
-//            System.out.println("KEY:"+key + query.getGroupBy_Field());
+//            System.out.println("KEY:"+key + query.getGroupBy_Field() + " increment:" + increment);
             query.updateField(key, index, increment, ifSet);
         }
     }
@@ -95,4 +94,11 @@ public class NaiveQueryBatch {
         }
         return increment;
     }
+
+    private void resetQueries(){
+        for(Query q: this.queries){
+            q.reset();
+        }
+    }
+
 }

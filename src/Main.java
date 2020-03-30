@@ -3,15 +3,17 @@ import java.util.*;
 public class Main {
 
     // modify this variable for other csv files
-    private final static String FILENAME = "dataset/sf1.csv";
+    private final static String FILENAME = "dataset/test.csv";
     private static List<String> FILENAMES = new LinkedList<>();
     private final static String[] attributes = new String[]{"A", "B", "C", "D", "E"};
 
 
     public static void main(String[] args) {
-        inputFileNames(15, 20);
-        naiveDBBenchMark();
-        moonDBBenchMark();
+
+
+        inputFileNames(1,1);
+//        naiveDBBenchMark();
+        mooDBBenchMark();
     }
 
     private static void naiveDBBenchMark(){
@@ -21,6 +23,7 @@ public class Main {
             NaiveSchema schema = new NaiveSchema(f, Arrays.asList(attributes));
             NaiveQueryBatch qb = new NaiveQueryBatch(schema);
 
+            System.out.print("size:"+qb.schema.getNaiveStorage().getRoot().size());
             // read queries
             ArrayList<String> queries = new ArrayList<>();
             queries.add("SELECT A, SUM(1), SUM(B), SUM(C), SUM(D), SUM(E) FROM R group by A;");
@@ -43,12 +46,17 @@ public class Main {
             qb.evaluateBatch();
         }
     }
-    private static void moonDBBenchMark(){
+    private static void mooDBBenchMark(){
         // create the trie and read data from the csv file
         for(String f: FILENAMES) {
+
+            // TODO: CHANGE IT BACK
+            f = FILENAME;
+
             System.out.println("EXECUTING FILE: " + f);
             Schema schema = new Schema(f, Arrays.asList(attributes));
             Trie trie = schema.getTrie();
+            trie.displayAll();
 
             QueryBatch qb = new QueryBatch(schema);
 
@@ -72,16 +80,6 @@ public class Main {
 
             // problem 1
             qb.evaluate1();
-
-
-            //        // get all queries
-            //        ArrayList<Query> queryList = qb.getQueries();
-            //        for(Query q: queryList){
-            //            q.updateField(0,0,1);
-            ////            q.parse("SELECT B, SUM(1), SUM(A), SUM(C), SUM(D), SUM(E) FROM R GROUP BY B;");
-            //            q.printResult();
-            //            q.printQueryParser();
-            //        }
         }
     }
 

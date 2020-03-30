@@ -5,14 +5,21 @@ public class Query {
     private String query;
     private int fieldSize; // number of fields to be returned
     private int type;
-    private HashMap<Double, double[]> aggs_groupby;
+    private Map<Double, double[]> aggs_groupby;
     private double[] aggs;
+
+
+    public double[] par_aggs;
 
     private ArrayList<String> outputFieldNames;
     private String GroupBy_Field;
 
-    private final static int GROUPBYQUERY = 1;
-    private final static int GENERALQUERY = 0;
+    final static int GROUPBYQUERY = 1;
+    final static int GENERALQUERY = 0;
+
+    void clear_partial (){
+        this.par_aggs = new double[fieldSize];
+    }
 
     Query(String s){
         s = s.toUpperCase();
@@ -22,10 +29,14 @@ public class Query {
         this.outputFieldNames = new ArrayList<>();
         this.parse();
         this.fieldSize = outputFieldNames.size();
-        this.aggs_groupby = new HashMap<>();
-        this.aggs = new double[fieldSize];
+        reset();
     }
 
+    public void reset(){
+        this.aggs_groupby = new HashMap<>();
+        this.aggs = new double[fieldSize];
+        this.par_aggs = new double[fieldSize];
+    }
 
     /**
      * For example: aggs_gb_A[A][0] += par_aggs_gb_A[0]

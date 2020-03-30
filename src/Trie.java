@@ -77,7 +77,7 @@ class Trie {
 
     private void display(TrieNode root, int level, double[] str){
         if(root == null || root.getChildren() == null || root.getChildren().isEmpty()){
-            System.out.println(Arrays.toString(str));
+//            System.out.println(Arrays.toString(str));
             return;
         }
 
@@ -86,6 +86,7 @@ class Trie {
             if(next != null){
                 str[level] = key;
                 display(next, level + 1, str);
+                System.out.println("level-->" + level + Arrays.toString(str));
             }
         }
     }
