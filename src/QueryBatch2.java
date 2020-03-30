@@ -71,7 +71,7 @@ public class QueryBatch2 {
                 } else if (op.contains("SUM")) {
 
                     String expr = op.substring(4, op.length() - 1);
-                    increment = parseSum(expr, str);
+//                    increment = parseSum(expr, str);
 
                 } else {
                     // assume only one letter is selected, for example： select A, B, C from R
