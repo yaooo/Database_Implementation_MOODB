@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) {
 
 
-        inputFileNames(1,1);
+        inputFileNames(17,20);
 //        naiveDBBenchMark();
         System.out.print("\n\n");
         mooDBBenchMark();
@@ -41,20 +41,25 @@ public class Main {
         for(String f: FILENAMES) {
 
             System.out.println("EXECUTING FILE: " + f);
+            long c = System.currentTimeMillis();
             Schema schema = new Schema(f, Arrays.asList(attributes));
-            Trie trie = schema.getTrie();
-            trie.displayAll();
+//            Trie trie = schema.getTrie();
+//            trie.displayAll();
+            System.out.println("Create trie:"+ (System.currentTimeMillis()-c) +"ms");
+
+            QueryBatch3 qb3 = new QueryBatch3(schema);
+            qb3.readQueries(queries);
+            qb3.evaluate();
 
             QueryBatch2 qb2 = new QueryBatch2(schema);
-            // read queries into query batch before processing further
             qb2.readQueries(queries);
             qb2.evaluate();
 
-            //todo: change it back
+//            //todo: change it back
             QueryBatch1 qb1 = new QueryBatch1(schema);
-            // read queries into query batch before processing further
             qb1.readQueries(queries);
             qb1.evaluate();
+
         }
     }
 
@@ -68,7 +73,7 @@ public class Main {
 
     private static ArrayList<String> inputQueries(){
         ArrayList<String> queries = new ArrayList<>();
-        queries.add("SELECT A, SUM(1), SUM(B), SUM(C), SUM(D), SUM(E) FROM R group by A;");
+        queries.add("SELECT A, SUM(1), SUM(B), SUM(C), SUM(D), SUM(E) FROM R GROUP BY A;");
         queries.add("SELECT B, SUM(1), SUM(A), SUM(C), SUM(D), SUM(E) FROM R GROUP BY B;");
         queries.add("SELECT C, SUM(1), SUM(A), SUM(B), SUM(D), SUM(E) FROM R GROUP BY C;");
         queries.add("SELECT D, SUM(1), SUM(A), SUM(B), SUM(C), SUM(E) FROM R GROUP BY D;");

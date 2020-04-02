@@ -5,8 +5,9 @@ public class Query {
     private String query;
     private int fieldSize; // number of fields to be returned
     private int type;
-    private Map<Double, double[]> aggs_groupby;
+    private HashMap<Double, double[]> aggs_groupby;
     private double[] aggs;
+    public int[] mark;
 
 
     public double[] par_aggs;
@@ -33,6 +34,8 @@ public class Query {
         this.aggs_groupby = new HashMap<>();
         this.aggs = new double[fieldSize];
         this.par_aggs = new double[fieldSize];
+        this.mark = new int[fieldSize];
+        Arrays.fill(mark, -1);
     }
 
     void resetPartial (){
@@ -72,7 +75,7 @@ public class Query {
         System.out.println("\nResult of " + this.query);
         if(type == GROUPBYQUERY){
             for(double key: aggs_groupby.keySet()){
-                System.out.println("key" + key +","+Arrays.toString(aggs_groupby.get(key)));
+                System.out.println(Arrays.toString(aggs_groupby.get(key)));
             }
         }
         if(type == GENERALQUERY){

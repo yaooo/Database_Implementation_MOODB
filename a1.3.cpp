@@ -65,7 +65,7 @@ for (r_A <- R_TRIE){
 
 
 			par_aggs_gb_B[0] += 1
-			par_aggs_gb_B[1] += r_A.A
+			par_aggs_gb_B[1] += 1
 			par_aggs_gb_B[2] += r_C.C
 			
 
@@ -78,7 +78,7 @@ for (r_A <- R_TRIE){
 		}
 
 		aggs_gb_B[r_B.B][0] += par_aggs_gb_B[0]			// sum(1) group by B
-		aggs_gb_B[r_B.B][1] += par_aggs_gb_B[1]			// sum(A) group by B
+		aggs_gb_B[r_B.B][1] += par_aggs_gb_B[0] * r_A.A			// sum(A) group by B
 		aggs_gb_B[r_B.B][2] += par_aggs_gb_B[2]			// sum(C) group by B
 	}
 

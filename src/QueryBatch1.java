@@ -4,17 +4,19 @@ public class QueryBatch1 {
     private ArrayList<Query> queries;
     private Schema schema;
     private int depth;
+    private int version;
 
     QueryBatch1(Schema schema){
         this.schema = schema;
         this.depth = this.schema.getAttributeOrder().size();
         queries = new ArrayList<>();
+        this.version = 1;
     }
 
     // read all queries
     void readQueries(ArrayList<String> queries){
         for(String s: queries){
-            this.queries.add(new Query(s));
+            this.queries.add(new Query(s.toUpperCase()));
         }
     }
 
@@ -24,7 +26,7 @@ public class QueryBatch1 {
 //        for(Query q: this.queries) {
 //            q.printResult();
 //        }
-        System.out.println("Evaluate (MoonDB--version 1), run time: " + (System.currentTimeMillis() - c) + "ms." );
+        System.out.println("Evaluate (MoonDB--version "+ version+ "), run time: " + (System.currentTimeMillis() - c) + "ms." );
     }
 
 

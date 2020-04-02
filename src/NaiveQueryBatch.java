@@ -15,7 +15,7 @@ public class NaiveQueryBatch {
     void readQueries(ArrayList<String> queries){
         this.queries.clear();
         for(String s: queries){
-            this.queries.add(new Query(s));
+            this.queries.add(new Query(s.toUpperCase()));
         }
     }
 

@@ -65,7 +65,9 @@ class Trie {
      * Print all tuples in the database
     **/
     void displayAll(){
+        long c = System.currentTimeMillis();
         display(this.root, 0, new double[depth] );
+        System.out.println(System.currentTimeMillis() - c);
     }
 
     private void display(TrieNode root, int level, double[] str){
