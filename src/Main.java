@@ -3,7 +3,7 @@ import java.util.*;
 public class Main {
 
     // modify this variable for other csv files
-    private final static String FILENAME = "dataset/sf20.csv";
+//    private final static String FILENAME = "dataset/sf20.csv";
     private static List<String> FILENAMES = new LinkedList<>();
     private final static String[] attributes = new String[]{"A", "B", "C", "D", "E"};
 
@@ -12,7 +12,7 @@ public class Main {
 
 
         inputFileNames(17,20);
-//        naiveDBBenchMark();
+        naiveDBBenchMark();
         System.out.print("\n\n");
         mooDBBenchMark();
     }
@@ -64,11 +64,11 @@ public class Main {
     }
 
     private static void inputFileNames(int start, int end){
-//        while(start <= end){
-//            FILENAMES.add("dataset/sf"+start+".csv");
-//            start++;
-//        }
-        FILENAMES.add(FILENAME);
+        while(start <= end){
+            FILENAMES.add("dataset/sf"+start+".csv");
+            start++;
+        }
+//        FILENAMES.add(FILENAME);
     }
 
     private static ArrayList<String> inputQueries(){
