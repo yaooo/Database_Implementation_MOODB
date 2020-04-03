@@ -220,37 +220,6 @@ public class QueryBatch3{
                 query.par_aggs[index] += parseSum(expr, str, query.isGroupBy());
             }
         }
-//        if(type == Query.GROUPBYQUERY){
-//            for(int index = 0; index < query.getFieldSize(); index++) {
-//                if(query.mark[index] != -1) continue;
-//
-//                String op = query.getFields().get(index);
-//                // parse the tokenized query, one word by another
-//                if(!op.contains("SUM")){ // select A, B, C ....
-//                    query.par_aggs[index] = key;
-//                }
-//                else if (op.equals("SUM(1)")) {
-//                    query.par_aggs[index] += 1;
-//                } else if (op.contains("SUM")) {
-//                    String expr = op.substring(4, op.length() - 1);
-//                    query.par_aggs[index] += parseSum(expr, str, true);
-//                }
-//            }
-//        }
-//        else if(type == Query.GENERALQUERY){
-//            for(int index = 0; index < query.getFieldSize(); index++) {
-//                if(query.mark[index] != -1) continue;
-//
-//                String op = query.getFields().get(index);
-//
-//                if (op.equals("SUM(1)")) {
-//                    query.par_aggs[index] += 1;
-//                } else if (op.contains("SUM")) {
-//                    String expr = op.substring(4, op.length() - 1);
-//                    query.par_aggs[index] += parseSum(expr, str, false);
-//                }
-//            }
-//        }
     }
 
 

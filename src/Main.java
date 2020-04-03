@@ -10,7 +10,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-
+        // read files from dataset/sf1.csv to dataset/sf20.csv
         inputFileNames(1,20);
         for(String f: FILENAMES){
             System.out.println("EXECUTING FILE: " + f);

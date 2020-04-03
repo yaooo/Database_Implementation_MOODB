@@ -136,3 +136,65 @@ calculatePartial(query, array){
 		}
     }
 }
+
+
+// load query strings into a list of query objects
+function readQueries(queries){
+    // create query objects and store them in query_list
+	for(query <- query_list){
+		if(query != innermostQuery && query != outermostQuery && query == groupByQuery){
+			for(aggs <- query.aggs_list){
+				if(aggs == "SUM(1)") 
+					continue
+				if(aggs is decomposable){
+					// update query.mark[aggs] to a positive number
+				}
+			}
+		}
+	}
+}
+
+
+    // handle the general query
+    if(generalQuery != null && outermostQuery != null){
+        for(int index = 0; index < generalQuery.getFieldSize(); index++) {
+            String op = generalQuery.getFields().get(index);
+
+            if (op.equals("SUM(1)")) {
+                int i = outermostQuery.getFields().indexOf("SUM(1)");
+                if(i != -1){
+                    generalQuery.mark[index] = index;
+                }
+
+            } else if (op.contains("SUM")) {
+                String expr = op.substring(4, op.length() - 1);
+                int i = ifOutermosterQueryContains(expr);
+                if(i != -1) {
+                    generalQuery.mark[index] = index;
+                }
+            }
+        }
+    }
+
+    // handle any other group-by queries
+    for(Query q: this.queries){
+        if(q != innermostQuery && q != outermostQuery && q != generalQuery){
+            int indexOfSum_1 = q.indexOfSum_1();
+            String groupByField = q.getGroupBy_Field();
+
+            // if sum(1) does not exit, that means we cannot take advantage of partials
+            if(indexOfSum_1 == -1) continue;
+
+            for(int index = 0; index < q.getFieldSize(); index++) {
+                String op = q.getFields().get(index);
+
+                if (!op.equals("SUM(1)") && op.contains("SUM")) {
+                    String expr = op.substring(4, op.length() - 1);
+                    if(schema.comparePriority(expr, groupByField)<0){
+                        q.mark[index] = index;
+                    }
+                }
+            }
+        }
+    }
+}
