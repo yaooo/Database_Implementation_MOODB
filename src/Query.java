@@ -8,8 +8,6 @@ public class Query {
     private HashMap<Double, double[]> aggs_groupby;
     private double[] aggs;
     public int[] mark;
-
-
     public double[] par_aggs;
 
     private ArrayList<String> outputFieldNames;
@@ -17,7 +15,6 @@ public class Query {
 
     final static int GROUPBYQUERY = 1;
     final static int GENERALQUERY = 0;
-
 
     Query(String s){
         s = s.toUpperCase();
@@ -30,6 +27,9 @@ public class Query {
         resetQuery();
     }
 
+    /**
+     * reset the query parameters
+     */
     void resetQuery(){
         this.aggs_groupby = new HashMap<>();
         this.aggs = new double[fieldSize];
@@ -38,17 +38,22 @@ public class Query {
         Arrays.fill(mark, -1);
     }
 
+    /**
+     * Reinitialize the partial aggregate array
+     */
     void resetPartial (){
         this.par_aggs = new double[fieldSize];
     }
 
 
     /**
-     * For example: aggs_gb_A[A][0] += par_aggs_gb_A[0]
-     * --> updateField(A, 0, par_aggs_gb_A[0])
-     **/
+     * Update the return values of the query
+     * @param key the group_by field for a group-by query, otherwise this value can be arbitrary
+     * @param index the index of the updated position in the return_fields list
+     * @param increment a value to be increased
+     * @param ifSet whether to increase the value or set the value
+     */
     void updateField(double key, int index, double increment, boolean ifSet){
-
         if(type == GROUPBYQUERY) {
             double[] fields = (aggs_groupby.containsKey(key)) ? aggs_groupby.get(key) : new double[fieldSize];
             if(!ifSet){
@@ -63,14 +68,10 @@ public class Query {
         }
     }
 
-    ArrayList<String> getFields(){return outputFieldNames;}
 
-    int getFieldSize(){return fieldSize;}
-
-    String getGroupBy_Field(){return GroupBy_Field;}
-
-    int getType(){return type;}
-
+    /**
+     * Print the results of aggregates from this query
+     */
     void printResult(){
         System.out.println("\nResult of " + this.query);
         if(type == GROUPBYQUERY){
@@ -83,6 +84,7 @@ public class Query {
         }
     }
 
+
     /**
      * Determine the type of the query
      * Type 0: contains "GROUP BY"
@@ -92,6 +94,10 @@ public class Query {
         return query.contains("GROUP BY")? GROUPBYQUERY:GENERALQUERY;
     }
 
+
+    /**
+     * Parse the query, and store the information needed to identify the query
+     */
     private void parse(){
         String theString = this.query.replace(';', ' ');
         int addField = 0;
@@ -110,20 +116,22 @@ public class Query {
             }
             if(addField == 0) this.outputFieldNames.add(theToken);
             if(addField == 2) this.GroupBy_Field = theToken;
-//            System.out.println("Type:" + addField + "--"+ theToken);
         }
     }
 
-    public void printQueryParser(){
-        System.out.println(outputFieldNames.toString());
-        if(this.type == GROUPBYQUERY)
-            System.out.println(GroupBy_Field);
-    }
 
+    /**
+     * @return if this query contains the "GROUP BY" keyword
+     */
     boolean isGroupBy(){
         return this.type == GROUPBYQUERY;
     }
 
+
+    /**
+     * Return the index of "SUM(1)" from the list of return fields
+     * Return -1 if "SUM(1)" not found
+     */
     int indexOfSum_1(){
         for(int index = 0; index < fieldSize; index++) {
             String op = outputFieldNames.get(index);
@@ -134,4 +142,11 @@ public class Query {
         return -1;
     }
 
+    ArrayList<String> getFields(){return outputFieldNames;}
+
+    int getFieldSize(){return fieldSize;}
+
+    String getGroupBy_Field(){return GroupBy_Field;}
+
+    int getType(){return type;}
 }

@@ -1,6 +1,5 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -25,7 +24,7 @@ class Trie {
     }
 
     /**
-     * Build the Trie
+     * Build the Trie given a filename
      **/
     private void readData(String fileName){
         File text = new File(fileName);
@@ -44,11 +43,10 @@ class Trie {
 
 
     /**
-     * Insert a tuple into the trie
+     * Insert a tuple into the trie, update the max depth of the trie
      **/
-    void insert(String[] list) {
+    private void insert(String[] list) {
         TrieNode current = root;
-
         if(depth == 0) depth = Math.max(depth, list.length);
 
         for (String num: list) {
@@ -72,7 +70,6 @@ class Trie {
 
     private void display(TrieNode root, int level, double[] str){
         if(root == null || root.getChildren() == null || root.getChildren().isEmpty()){
-//            System.out.println(Arrays.toString(str));
             return;
         }
 
@@ -81,11 +78,14 @@ class Trie {
             if(next != null){
                 str[level] = key;
                 display(next, level + 1, str);
-//                System.out.println("level-->" + level + Arrays.toString(str));
             }
         }
     }
 
+
+    /**
+     * Return the root of the trie
+     */
     TrieNode getRoot(){return root;}
 
     /**
@@ -95,7 +95,7 @@ class Trie {
 
 
     /**
-     * return if the Trie is empty
+     * Return if the Trie is empty
      * **/
     boolean isEmpty() {
         return root == null;

@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) {
 
 
-        inputFileNames(15,20);
+        inputFileNames(1,20);
         for(String f: FILENAMES){
             System.out.println("EXECUTING FILE: " + f);
             mooDBBenchMark(f);
@@ -36,12 +36,7 @@ public class Main {
         // create queries
         ArrayList<String> queries = inputQueries();
 
-//        System.out.println("Creating the trie...");
-
-//        long c = System.currentTimeMillis();
         Schema schema = new Schema(f, Arrays.asList(attributes));
-
-//        System.out.println("Time taken creating the trie:"+ (System.currentTimeMillis()-c) +"ms");
 
         QueryBatch3 qb3 = new QueryBatch3(schema);
         qb3.readQueries(queries);
@@ -62,7 +57,7 @@ public class Main {
             FILENAMES.add("dataset/sf"+start+".csv");
             start++;
         }
-        FILENAMES.add(FILENAME);
+//        FILENAMES.add(FILENAME);
     }
 
     private static ArrayList<String> inputQueries(){

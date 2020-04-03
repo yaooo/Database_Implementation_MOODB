@@ -13,13 +13,18 @@ public class QueryBatch1 {
         this.version = 1;
     }
 
-    // read all queries
+    /**
+     * Create query objects into a list
+     */
     void readQueries(ArrayList<String> queries){
         for(String s: queries){
             this.queries.add(new Query(s.toUpperCase()));
         }
     }
 
+    /**
+     * Evaluate batch query and output the time taken
+     */
     void evaluate(){
         long c = System.currentTimeMillis();
         traverse(this.schema.getTrie().getRoot(), 0, new double[depth] );
@@ -31,15 +36,16 @@ public class QueryBatch1 {
     }
 
 
+    /**
+     * Traversing through the trie, compute batch query only at the leaf node of the trie
+     */
     private void traverse(Trie.TrieNode root, int level, double[] str){
-
         if(root == null || root.getChildren() == null || root.getChildren().isEmpty()){
             for(Query q: this.queries){
                 operation(q, str);            // perform calculation
             }
             return;
         }
-
         for(double key: root.getChildren().keySet()){
             Trie.TrieNode next = root.getChildren().get(key);
             if(next != null){
@@ -50,31 +56,29 @@ public class QueryBatch1 {
     }
 
 
+    /**
+     * Compute the return values for each tuple, and update return values for the query
+     */
     private void operation(Query query, double[] str){
         double increment = 0;
         double key = (query.isGroupBy()) ? str[schema.fieldIndex(query.getGroupBy_Field())] : 0;
 
         for(int index = 0; index < query.getFieldSize(); index++) {
             String op = query.getFields().get(index);
-            boolean ifSet = false; // for example, cases like "select A, B from R group by A", where we have to set B only
+            boolean ifSet = false; // for example, cases like "select A from R group by A", where we have to set B only
 
             if (op.equals("SUM(1)")) {
-
                 increment = 1;
 
             } else if (op.contains("SUM")) {
-
                 String expr = op.substring(4, op.length() - 1);
                 increment = parseSum(expr, str);
 
             } else {
-                // assume only one letter is selected, for example： select A, B, C from R
+                // when only one letter is selected, eg. select A, B, C from R
                 increment = str[schema.fieldIndex(op)];
-//                System.out.println("Select A:"+ increment);
                 ifSet = true;
-
             }
-//            System.out.println("KEY:"+key + query.getGroupBy_Field());
             query.updateField(key, index, increment, ifSet);
         }
     }

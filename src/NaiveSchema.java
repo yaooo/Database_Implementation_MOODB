@@ -11,14 +11,11 @@ public class NaiveSchema {
 
     NaiveStorage getNaiveStorage(){return naiveDB;}
 
-    List<String> getAttributeOrder(){
-        return attributeOrder;
-    }
-
-    /* return -1 if not found*/
+    /**
+     * Return the index of the attribute in the schema,
+     * else return -1
+     */
     int fieldIndex(String s){
         return attributeOrder.indexOf(s);
     }
-
-
 }

@@ -9,7 +9,9 @@ public class NaiveQueryBatch {
         queries = new ArrayList<>();
     }
 
-    // read all queries
+    /**
+     * Load queriy strings into a list of query object
+     */
     void readQueries(ArrayList<String> queries){
         this.queries.clear();
         for(String s: queries){
@@ -17,6 +19,9 @@ public class NaiveQueryBatch {
         }
     }
 
+    /**
+     * Evaluate batch query and output the time taken.
+     */
     void evaluateBatch(){
         resetQueries();
         long c = System.currentTimeMillis();
@@ -34,6 +39,9 @@ public class NaiveQueryBatch {
 
     }
 
+    /**
+     * Evaluate all queries, but one query at a time. Output the time taken.
+     */
     void evaluateIndepently(){
         resetQueries();
         long c = System.currentTimeMillis();
@@ -50,8 +58,9 @@ public class NaiveQueryBatch {
         System.out.println("Evaluate the query independently, run time: " + (System.currentTimeMillis() - c) + "ms." );
     }
 
-
-
+    /**
+     * Compute the return values for each tuple, and update return values for the query
+     */
     private void operation(Query query, double[] str){
         double increment = 0;
         double key = (query.isGroupBy()) ? str[schema.fieldIndex(query.getGroupBy_Field())] : 0;
