@@ -3,11 +3,9 @@ import java.util.ArrayList;
 public class NaiveQueryBatch {
     private ArrayList<Query> queries;
     private NaiveSchema schema;
-//    private int depth;
 
     NaiveQueryBatch(NaiveSchema schema){
         this.schema = schema;
-//        this.depth = this.schema.getAttributeOrder().size();
         queries = new ArrayList<>();
     }
 
@@ -19,8 +17,6 @@ public class NaiveQueryBatch {
         }
     }
 
-    ArrayList<Query> getQueries(){return queries;}
-
     void evaluateBatch(){
         resetQueries();
         long c = System.currentTimeMillis();
@@ -30,26 +26,28 @@ public class NaiveQueryBatch {
                 operation(q, d);
             }
         }
-//        for (Query q : this.queries) {
-//            q.printResult();
-//        }
+        if(Main.printResult)
+            for (Query q : this.queries) {
+                q.printResult();
+            }
         System.out.println("Evaluate the query batch, run time: " + (System.currentTimeMillis() - c) + "ms." );
 
     }
 
     void evaluateIndepently(){
-//        resetQueries();
-//        long c = System.currentTimeMillis();
-//        NaiveStorage storage = schema.getNaiveStorage();
-//        for (Query q : this.queries) {
-//            for(double[] d : storage.getRoot()) {
-//                operation(q, d);
-//            }
-//        }
-//        for (Query q : this.queries) {
-//            q.printResult();
-//        }
-//        System.out.println("Evaluate the query independently, run time: " + (System.currentTimeMillis() - c) + "ms." );
+        resetQueries();
+        long c = System.currentTimeMillis();
+        NaiveStorage storage = schema.getNaiveStorage();
+        for (Query q : this.queries) {
+            for(double[] d : storage.getRoot()) {
+                operation(q, d);
+            }
+        }
+        if(Main.printResult)
+            for (Query q : this.queries) {
+                q.printResult();
+            }
+        System.out.println("Evaluate the query independently, run time: " + (System.currentTimeMillis() - c) + "ms." );
     }
 
 
@@ -77,7 +75,6 @@ public class NaiveQueryBatch {
                 ifSet = true;
 
             }
-//            System.out.println("KEY:"+key + query.getGroupBy_Field() + " increment:" + increment);
             query.updateField(key, index, increment, ifSet);
         }
     }

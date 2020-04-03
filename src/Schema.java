@@ -40,10 +40,12 @@ public class Schema {
         int index1 = attributeOrder.indexOf(attr1);
         int index2 = attributeOrder.indexOf(attr2);
         if(index1 == -1 || index2 == -1){
-            System.out.print(attr1 + "--"+attr2);
             throw new IllegalArgumentException("Attribute does not exist in the schema");
         }
-
         return index1 - index2;
+    }
+
+    boolean contains(String expr){
+        return attributeOrder.indexOf(expr) != -1;
     }
 }

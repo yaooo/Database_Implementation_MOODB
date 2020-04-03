@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class QueryBatch2 {
     private ArrayList<Query> queries;
@@ -97,11 +96,21 @@ public class QueryBatch2 {
             query.resetPartial();
         }
         else if(level == indexOfKey) { // any other group by
+
             double increment = 0;
             for(int index = 0; index < query.getFieldSize(); index ++){
-                boolean ifset = false;
-                if(index == 0) ifset = true;
+                String op = query.getFields().get(index);
                 increment = query.par_aggs[index];
+                boolean ifset = (index == 0);
+                if(op.contains("SUM(1)"))
+                    increment = query.par_aggs[index];
+                else if(op.contains("SUM")){
+                    String expr = op.substring(4, op.length() - 1);
+                    if(schema.contains(expr) && schema.comparePriority(expr, query.getGroupBy_Field()) < 0){
+                        int i = schema.fieldIndex(expr);
+                        increment = query.par_aggs[index] * str[i];
+                    }
+                }
                 query.updateField(key, index, increment, ifset);
             }
             query.resetPartial();
@@ -125,12 +134,16 @@ public class QueryBatch2 {
                 // parse the tokenized query, one word by another
                 if(!op.contains("SUM")){ // select A from
                     query.par_aggs[index] = key;
-                }
-                else if (op.equals("SUM(1)")) { // select sum(1)
+
+                } else if (op.equals("SUM(1)")) { // select sum(1)
                     query.par_aggs[index] += 1;
+
                 } else if (op.contains("SUM")) { // select sum(expr), expr can be a*b*c*d....
                     String expr = op.substring(4, op.length() - 1);
-                    query.par_aggs[index] += parseSum(expr, str, true);
+                    if(schema.contains(expr) && schema.comparePriority(expr, query.getGroupBy_Field())<0){
+                        query.par_aggs[index] += 1;
+                    }else
+                        query.par_aggs[index] += parseSum(expr, str, true);
                 }
             }
         }
@@ -146,8 +159,8 @@ public class QueryBatch2 {
                 }
             }
         }
-    }
 
+    }
 
     /**
      * There is no need to calculate partial aggregates for the most bottom level of the trie,

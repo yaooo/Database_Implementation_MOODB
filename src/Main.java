@@ -11,63 +11,57 @@ public class Main {
     public static void main(String[] args) {
 
 
-        inputFileNames(17,20);
-//        naiveDBBenchMark();
-        System.out.print("\n\n");
-        mooDBBenchMark();
-    }
-
-    private static void naiveDBBenchMark(){
-        for(String f: FILENAMES) {
-
+        inputFileNames(15,20);
+        for(String f: FILENAMES){
             System.out.println("EXECUTING FILE: " + f);
-            NaiveSchema schema = new NaiveSchema(f, Arrays.asList(attributes));
-            NaiveQueryBatch qb = new NaiveQueryBatch(schema);
-
-            // read queries
-            ArrayList<String> queries = inputQueries();
-            // read queries into query batch before processing further
-            qb.readQueries(queries);
-//            qb.evaluateIndepently();
-
-            qb.evaluateBatch();
+            mooDBBenchMark(f);
+            naiveDBBenchMark(f);
         }
+        System.out.print("\n\n");
     }
-    private static void mooDBBenchMark(){
+
+    private static void naiveDBBenchMark(String f){
+        NaiveSchema schema = new NaiveSchema(f, Arrays.asList(attributes));
+        NaiveQueryBatch qb = new NaiveQueryBatch(schema);
+
+        // read queries
+        ArrayList<String> queries = inputQueries();
+        // read queries into query batch before processing further
+        qb.readQueries(queries);
+        qb.evaluateIndepently();
+
+        qb.evaluateBatch();
+    }
+    private static void mooDBBenchMark(String f){
         // create queries
         ArrayList<String> queries = inputQueries();
 
-        // create the trie and read data from the csv file
-        for(String f: FILENAMES) {
+//        System.out.println("Creating the trie...");
 
-            System.out.println("EXECUTING FILE: " + f);
-            System.out.println("Creating the trie...");
+//        long c = System.currentTimeMillis();
+        Schema schema = new Schema(f, Arrays.asList(attributes));
 
-            long c = System.currentTimeMillis();
-            Schema schema = new Schema(f, Arrays.asList(attributes));
+//        System.out.println("Time taken creating the trie:"+ (System.currentTimeMillis()-c) +"ms");
 
-            System.out.println("Time taken creating the trie:"+ (System.currentTimeMillis()-c) +"ms");
+        QueryBatch3 qb3 = new QueryBatch3(schema);
+        qb3.readQueries(queries);
+        qb3.evaluate();
 
-            QueryBatch3 qb3 = new QueryBatch3(schema);
-            qb3.readQueries(queries);
-            qb3.evaluate();
+        QueryBatch2 qb2 = new QueryBatch2(schema);
+        qb2.readQueries(queries);
+        qb2.evaluate();
 
-            QueryBatch2 qb2 = new QueryBatch2(schema);
-            qb2.readQueries(queries);
-            qb2.evaluate();
+        QueryBatch1 qb1 = new QueryBatch1(schema);
+        qb1.readQueries(queries);
+        qb1.evaluate();
 
-            QueryBatch1 qb1 = new QueryBatch1(schema);
-            qb1.readQueries(queries);
-            qb1.evaluate();
-
-        }
     }
 
     private static void inputFileNames(int start, int end){
-//        while(start <= end){
-//            FILENAMES.add("dataset/sf"+start+".csv");
-//            start++;
-//        }
+        while(start <= end){
+            FILENAMES.add("dataset/sf"+start+".csv");
+            start++;
+        }
         FILENAMES.add(FILENAME);
     }
 
