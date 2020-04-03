@@ -7,11 +7,11 @@ public class Query {
     private int type;
     private HashMap<Double, double[]> aggs_groupby;
     private double[] aggs;
-    public int[] mark;
-    public double[] par_aggs;
-
     private ArrayList<String> outputFieldNames;
     private String GroupBy_Field;
+
+    int[] mark;
+    double[] par_aggs;
 
     final static int GROUPBYQUERY = 1;
     final static int GENERALQUERY = 0;

@@ -9,7 +9,7 @@ public class QueryBatch1 {
     QueryBatch1(Schema schema){
         this.schema = schema;
         this.depth = this.schema.getAttributeOrder().size();
-        queries = new ArrayList<>();
+        this.queries = new ArrayList<>();
         this.version = 1;
     }
 
@@ -35,7 +35,6 @@ public class QueryBatch1 {
         System.out.println("Evaluate (MoonDB--version "+ version+ "), run time: " + (System.currentTimeMillis() - c) + "ms." );
     }
 
-
     /**
      * Traversing through the trie, compute batch query only at the leaf node of the trie
      */
@@ -54,7 +53,6 @@ public class QueryBatch1 {
             }
         }
     }
-
 
     /**
      * Compute the return values for each tuple, and update return values for the query

@@ -49,7 +49,6 @@ public class Main {
         QueryBatch1 qb1 = new QueryBatch1(schema);
         qb1.readQueries(queries);
         qb1.evaluate();
-
     }
 
     private static void inputFileNames(int start, int end){

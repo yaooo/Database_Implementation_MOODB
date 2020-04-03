@@ -13,7 +13,7 @@ public class QueryBatch2 {
     QueryBatch2(Schema schema){
         this.schema = schema;
         this.depth = this.schema.getAttributeOrder().size();
-        queries = new ArrayList<>();
+        this.queries = new ArrayList<>();
         this.version = 2;
         this.outermostQuery = null;
         this.generalQuery = null;

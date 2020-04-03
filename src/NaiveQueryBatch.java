@@ -70,11 +70,9 @@ public class NaiveQueryBatch {
             boolean ifSet = false; // for example, cases like "select A, B from R group by A", where we have to set B only
 
             if (op.equals("SUM(1)")) {
-
                 increment = 1;
 
             } else if (op.contains("SUM")) {
-
                 String expr = op.substring(4, op.length() - 1);
                 increment = parseSum(expr, str);
 
@@ -106,5 +104,4 @@ public class NaiveQueryBatch {
             q.resetQuery();
         }
     }
-
 }

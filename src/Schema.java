@@ -5,7 +5,7 @@ public class Schema {
     private List<String> attributeOrder;
 
     Schema(String fileName, List<String> attrs){
-        attributeOrder = attrs; // EX: <A, B, C, D>
+        attributeOrder = attrs; // eg: <A, B, C, D, E>
         trie = new Trie(fileName, attributeOrder.size());
     }
 
@@ -20,7 +20,6 @@ public class Schema {
     List<String> getAttributeOrder(){
         return attributeOrder;
     }
-
 
     /**
      * @param i the index of an attribute in the schema

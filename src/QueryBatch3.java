@@ -9,12 +9,10 @@ public class QueryBatch3{
     private Query outermostQuery;
     private int version;
 
-
-
     QueryBatch3(Schema schema){
         this.schema = schema;
         this.depth = this.schema.getAttributeOrder().size();
-        queries = new ArrayList<>();
+        this.queries = new ArrayList<>();
         this.version = 3;
         this.outermostQuery = null;
         this.generalQuery = null;
@@ -172,8 +170,7 @@ public class QueryBatch3{
                 }
                 query.updateField(-1, index, increment, ifset);
             }
-            // reset par_aggs
-            query.resetPartial();
+            query.resetPartial();// reset par_aggs
         }
         else if(level == indexOfKey) {
             double increment = 0;
@@ -190,7 +187,7 @@ public class QueryBatch3{
                     increment = query.par_aggs[index];
                 query.updateField(key, index, increment, ifset);
             }
-            query.resetPartial();
+            query.resetPartial();// reset par_aggs
         }
     }
 
@@ -212,8 +209,7 @@ public class QueryBatch3{
             // parse the tokenized query, one word by another
             if(!op.contains("SUM")){ // select A, B, C ....
                 query.par_aggs[index] = key;
-            }
-            else if (op.equals("SUM(1)")) {
+            } else if (op.equals("SUM(1)")) {
                 query.par_aggs[index] += 1;
             } else if (op.contains("SUM")) {
                 String expr = op.substring(4, op.length() - 1);
@@ -238,7 +234,6 @@ public class QueryBatch3{
                 increment = 1;
 
             } else if (op.contains("SUM")) {
-
                 String expr = op.substring(4, op.length() - 1);
                 increment = parseSum(expr, str, true);
 
@@ -246,9 +241,7 @@ public class QueryBatch3{
                 // assume only one letter is selected, for example： select A, B, C from R
                 increment = str[schema.fieldIndex(op)];
                 ifSet = true;
-
             }
-//            System.out.println("KEY:"+key + query.getGroupBy_Field());
             query.updateField(key, index, increment, ifSet);
         }
     }
@@ -275,7 +268,6 @@ public class QueryBatch3{
     }
 
 
-
     /**
      * If the outermost query contains this attribute
      * eg. if aggs_gb_A has "SUM(B)", and aggs tries to select "SUM(A*B)",
@@ -294,13 +286,11 @@ public class QueryBatch3{
                 res = res &&((contains && count <2) || this.outermostQuery.getGroupBy_Field().equals(c+""));
             }
         }
-
         if(res){
             if(res1 == -1){ // sum(A)
                 res1 = this.outermostQuery.getFields().indexOf("SUM(1)");
             }
         }
-
         return (res)? res1: -1;
     }
 }

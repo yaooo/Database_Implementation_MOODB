@@ -5,7 +5,7 @@ public class NaiveSchema {
     private List<String> attributeOrder;
 
     NaiveSchema(String fileName, List<String> attrs){
-        attributeOrder = attrs; // EX: <A, B, C, D>
+        attributeOrder = attrs; // eg: <A, B, C, D, E>
         naiveDB = new NaiveStorage(fileName, attributeOrder.size());
     }
 
