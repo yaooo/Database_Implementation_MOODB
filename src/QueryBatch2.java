@@ -24,9 +24,10 @@ public class QueryBatch2 {
     void evaluate(){
         long c = System.currentTimeMillis();
         traverse(this.schema.getTrie().getRoot(), 0, new double[depth] );
-//        for(Query q: this.queries) {
-//            q.printResult();
-//        }
+        if(Main.printResult)
+            for(Query q: this.queries) {
+                q.printResult();
+            }
         System.out.println("Evaluate (MoonDB--version "+ version + "), run time: " + (System.currentTimeMillis() - c) + "ms." );
     }
 

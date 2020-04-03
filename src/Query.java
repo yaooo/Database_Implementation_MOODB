@@ -120,7 +120,18 @@ public class Query {
             System.out.println(GroupBy_Field);
     }
 
-    public boolean isGroupBy(){
+    boolean isGroupBy(){
         return this.type == GROUPBYQUERY;
     }
+
+    int indexOfSum_1(){
+        for(int index = 0; index < fieldSize; index++) {
+            String op = outputFieldNames.get(index);
+            if (op.equals("SUM(1)")) {
+                return  index;
+            }
+        }
+        return -1;
+    }
+
 }

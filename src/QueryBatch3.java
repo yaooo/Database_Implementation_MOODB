@@ -7,6 +7,7 @@ public class QueryBatch3 {
     private Query outermostQuery;
     private int depth;
     private Query generalQuery;
+    private Query innermostQuery;
 
     QueryBatch3(Schema schema){
         this.schema = schema;
@@ -14,6 +15,7 @@ public class QueryBatch3 {
         this.queries = new ArrayList<>();
         this.outermostQuery = null;
         this.generalQuery = null;
+        this.innermostQuery = null;
     }
 
     // read all queries
@@ -22,8 +24,11 @@ public class QueryBatch3 {
             s = s.toUpperCase();
             Query q = new Query(s);
 
-            if(s.contains("GROUP BY "+ this.schema.getAttributeOrder().get(0))){
+            if(s.contains("GROUP BY "+ this.schema.getAttrByIndex(0))){
                 outermostQuery = q;
+            }
+            if(s.contains("GROUP BY "+ this.schema.getLastAttribute())){
+                innermostQuery = q;
             }
             if(q.getType() == Query.GENERALQUERY){
                 this.queries.add(0, q);
@@ -31,7 +36,9 @@ public class QueryBatch3 {
             }else
                 this.queries.add(q);
         }
-        if(generalQuery != null){
+
+        // handle the general query
+        if(generalQuery != null && outermostQuery != null){
             for(int index = 0; index < generalQuery.getFieldSize(); index++) {
                 String op = generalQuery.getFields().get(index);
 
@@ -43,9 +50,31 @@ public class QueryBatch3 {
 
                 } else if (op.contains("SUM")) {
                     String expr = op.substring(4, op.length() - 1);
-                    int i = ifOutMosterQueryContains(expr);
+                    int i = ifOutermosterQueryContains(expr);
                     if(i != -1) {
                         generalQuery.mark[index] = i;
+                    }
+                }
+            }
+        }
+
+        // handle any other group-by queries
+        for(Query q: this.queries){
+            if(q != innermostQuery && q != outermostQuery && q != generalQuery){
+                int indexOfSum_1 = q.indexOfSum_1();
+                String groupByField = q.getGroupBy_Field();
+
+                // if sum(1) does not exit, that means we cannot take advantage of partials
+                if(indexOfSum_1 == -1) continue;
+
+                for(int index = 0; index < q.getFieldSize(); index++) {
+                    String op = q.getFields().get(index);
+
+                    if (!op.equals("SUM(1)") && op.contains("SUM")) {
+                        String expr = op.substring(4, op.length() - 1);
+                        if(schema.comparePriority(expr, groupByField)<0){
+                            q.mark[index] = indexOfSum_1;
+                        }
                     }
                 }
             }
@@ -55,9 +84,10 @@ public class QueryBatch3 {
     void evaluate(){
         long c = System.currentTimeMillis();
         traverse(this.schema.getTrie().getRoot(), 0, new double[depth] );
-//        for(Query q: this.queries) {
-//            q.printResult();
-//        }
+        if(Main.printResult)
+            for(Query q: this.queries) {
+                q.printResult();
+            }
         System.out.println("Evaluate (MoonDB--version 3), run time: " + (System.currentTimeMillis() - c) + "ms." );
     }
 
@@ -71,7 +101,7 @@ public class QueryBatch3 {
         if(root == null || root.getChildren() == null || root.getChildren().isEmpty() || level == this.depth){
             for(Query q: this.queries){
                 calculatePartial(q, str);// calculate par_aggs_gb
-                if(q.getGroupBy_Field().equals(schema.getAttributeOrder().get(depth-1))){
+                if(q.equals(innermostQuery)){
                     inner(q, str);
                 }
             }
@@ -84,11 +114,9 @@ public class QueryBatch3 {
                 traverse(next, level + 1, str);
 
                 for(Query q: this.queries){
-                    if(!q.getGroupBy_Field().equals(schema.getAttributeOrder().get(depth-1))) {
-                        calculate(q, str, level);
-                    }
+                    calculate(q, str, level); // calculate aggs_gb
                 }
-                // calculate aggs_gb
+
             }
         }
     }
@@ -104,12 +132,10 @@ public class QueryBatch3 {
 
         double key = (query.isGroupBy()) ? str[indexOfKey] : 0;
 
+        // the innermost loop is already handled elsewhere
         if(query.getGroupBy_Field().equals(schema.getLastAttribute())) return;
 
         if(query.getType() == Query.GENERALQUERY && level == 0){
-
-//            System.out.println(Arrays.toString(query.par_aggs));
-//            System.out.println(Arrays.toString(query.mark));
             double increment = 0;
 
             for(int index = 0; index < query.getFieldSize(); index++) {
@@ -125,7 +151,7 @@ public class QueryBatch3 {
                 } else if(op.equals("SUM(1)")) { // select sum(1)
                     increment = (markedIndex == -1)? query.par_aggs[index]:increment;
 
-                } else if (op.contains("SUM") && op.contains(schema.getAttributeOrder().get(0))) { // sum(A*B*C)
+                } else if (op.contains("SUM") && op.contains(schema.getAttrByIndex(0))) { // sum(A*B)
 
                     increment = str[0] * ((markedIndex != -1)? increment:query.par_aggs[index]);
                     //  increment *= str[0] ----- increment = str[0] * query.par_aggs[index];
@@ -140,9 +166,17 @@ public class QueryBatch3 {
         else if(level == indexOfKey) {
             double increment = 0;
             for(int index = 0; index < query.getFieldSize(); index ++){
-                boolean ifset = false;
-                if(index == 0) ifset = true;
-                increment = query.par_aggs[index];
+                String op = query.getFields().get(index);
+
+                boolean ifset = (index == 0);
+
+                if (query.mark[index] != -1) {
+                    String expr = op.substring(4, op.length() - 1);
+                    int i = schema.getAttributeOrder().indexOf(expr);
+                    increment = query.par_aggs[query.mark[index]] * str[i];
+//                    System.out.println(str[i]);
+                }else
+                    increment = query.par_aggs[index];
                 query.updateField(key, index, increment, ifset);
             }
             query.resetPartial();
@@ -157,38 +191,56 @@ public class QueryBatch3 {
         double key = (query.isGroupBy()) ? str[schema.fieldIndex(query.getGroupBy_Field())] : 0;
 
         // not calculate the most inner level
-        if(query.getGroupBy_Field().equals(schema.getAttributeOrder().get(depth - 1))) return;
-        int type = query.getType(); // GROUPBYQUERY = 1; GENERALQUERY = 0;
+        if(query.equals(innermostQuery)) return;
+//        int type = query.getType(); // GROUPBYQUERY = 1; GENERALQUERY = 0;
 
-        if(type == Query.GROUPBYQUERY){
-            for(int index = 0; index < query.getFieldSize(); index++) {
-                String op = query.getFields().get(index);
-                // parse the tokenized query, one word by another
-                if(!op.contains("SUM")){ // select A, B, C ....
-                    query.par_aggs[index] = key;
-                }
-                else if (op.equals("SUM(1)")) {
-                    query.par_aggs[index] += 1;
-                } else if (op.contains("SUM")) {
-                    String expr = op.substring(4, op.length() - 1);
-                    query.par_aggs[index] += parseSum(expr, str, true);
-                }
+        for(int index = 0; index < query.getFieldSize(); index++) {
+            if(query.mark[index] != -1) continue;
+
+            String op = query.getFields().get(index);
+            // parse the tokenized query, one word by another
+            if(!op.contains("SUM")){ // select A, B, C ....
+                query.par_aggs[index] = key;
+            }
+            else if (op.equals("SUM(1)")) {
+                query.par_aggs[index] += 1;
+            } else if (op.contains("SUM")) {
+                String expr = op.substring(4, op.length() - 1);
+//                boolean ifGrouBy =
+                query.par_aggs[index] += parseSum(expr, str, query.isGroupBy());
             }
         }
-        else if(type == Query.GENERALQUERY){
-            for(int index = 0; index < query.getFieldSize(); index++) {
-                if(query.mark[index] != -1) continue;
-
-                String op = query.getFields().get(index);
-
-                if (op.equals("SUM(1)")) {
-                    query.par_aggs[index] += 1;
-                } else if (op.contains("SUM")) {
-                    String expr = op.substring(4, op.length() - 1);
-                    query.par_aggs[index] += parseSum(expr, str, false);
-                }
-            }
-        }
+//        if(type == Query.GROUPBYQUERY){
+//            for(int index = 0; index < query.getFieldSize(); index++) {
+//                if(query.mark[index] != -1) continue;
+//
+//                String op = query.getFields().get(index);
+//                // parse the tokenized query, one word by another
+//                if(!op.contains("SUM")){ // select A, B, C ....
+//                    query.par_aggs[index] = key;
+//                }
+//                else if (op.equals("SUM(1)")) {
+//                    query.par_aggs[index] += 1;
+//                } else if (op.contains("SUM")) {
+//                    String expr = op.substring(4, op.length() - 1);
+//                    query.par_aggs[index] += parseSum(expr, str, true);
+//                }
+//            }
+//        }
+//        else if(type == Query.GENERALQUERY){
+//            for(int index = 0; index < query.getFieldSize(); index++) {
+//                if(query.mark[index] != -1) continue;
+//
+//                String op = query.getFields().get(index);
+//
+//                if (op.equals("SUM(1)")) {
+//                    query.par_aggs[index] += 1;
+//                } else if (op.contains("SUM")) {
+//                    String expr = op.substring(4, op.length() - 1);
+//                    query.par_aggs[index] += parseSum(expr, str, false);
+//                }
+//            }
+//        }
     }
 
 
@@ -231,7 +283,7 @@ public class QueryBatch3 {
         double increment = 1;
         if(!ifGroupby){
             for(char c: expr.toCharArray()){
-                if(schema.getAttributeOrder().get(0).equals(""+c)) continue;
+                if(schema.getAttrByIndex(0).equals(""+c)) continue;
                 if(c != '*')    increment *= str[schema.fieldIndex(c+"")];
             }
         }else{
@@ -249,7 +301,7 @@ public class QueryBatch3 {
      * If the outermost query contains this attribute
      * eg. if aggs_gb_A has "SUM(B)", and aggs tries to select "SUM(A*B)", it would result true; otherwise, it would be false
      * */
-    private int ifOutMosterQueryContains(String expr){
+    private int ifOutermosterQueryContains(String expr){
         boolean res = true;
         int res1 = -1;
         int count = 0;

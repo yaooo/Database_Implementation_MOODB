@@ -3,16 +3,16 @@ import java.util.*;
 public class Main {
 
     // modify this variable for other csv files
-//    private final static String FILENAME = "dataset/sf20.csv";
+    private final static String FILENAME = "dataset/sf20.csv";
     private static List<String> FILENAMES = new LinkedList<>();
     private final static String[] attributes = new String[]{"A", "B", "C", "D", "E"};
-
+    public static boolean printResult = false;
 
     public static void main(String[] args) {
 
 
         inputFileNames(17,20);
-        naiveDBBenchMark();
+//        naiveDBBenchMark();
         System.out.print("\n\n");
         mooDBBenchMark();
     }
@@ -41,11 +41,12 @@ public class Main {
         for(String f: FILENAMES) {
 
             System.out.println("EXECUTING FILE: " + f);
+            System.out.println("Creating the trie...");
+
             long c = System.currentTimeMillis();
             Schema schema = new Schema(f, Arrays.asList(attributes));
-//            Trie trie = schema.getTrie();
-//            trie.displayAll();
-            System.out.println("Create trie:"+ (System.currentTimeMillis()-c) +"ms");
+
+            System.out.println("Time taken creating the trie:"+ (System.currentTimeMillis()-c) +"ms");
 
             QueryBatch3 qb3 = new QueryBatch3(schema);
             qb3.readQueries(queries);
@@ -55,7 +56,6 @@ public class Main {
             qb2.readQueries(queries);
             qb2.evaluate();
 
-//            //todo: change it back
             QueryBatch1 qb1 = new QueryBatch1(schema);
             qb1.readQueries(queries);
             qb1.evaluate();
@@ -64,11 +64,11 @@ public class Main {
     }
 
     private static void inputFileNames(int start, int end){
-        while(start <= end){
-            FILENAMES.add("dataset/sf"+start+".csv");
-            start++;
-        }
-//        FILENAMES.add(FILENAME);
+//        while(start <= end){
+//            FILENAMES.add("dataset/sf"+start+".csv");
+//            start++;
+//        }
+        FILENAMES.add(FILENAME);
     }
 
     private static ArrayList<String> inputQueries(){
