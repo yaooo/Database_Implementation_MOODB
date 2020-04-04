@@ -23,39 +23,47 @@ public class NaiveQueryBatch {
      * Evaluate batch query and output the time taken.
      */
     void evaluateBatch(){
+        int times = Main.numRun;
+        long total = 0;
         resetQueries();
-        long c = System.currentTimeMillis();
         NaiveStorage storage = schema.getNaiveStorage();
-        for(double[] d : storage.getRoot()) {
-            for (Query q : this.queries) {
-                operation(q, d);
-            }
-        }
-        if(Main.printResult)
-            for (Query q : this.queries) {
-                q.printResult();
-            }
-        System.out.println("Evaluate the query batch, run time: " + (System.currentTimeMillis() - c) + "ms." );
+        for(int i = 0; i < times; i ++) {
+            long c = System.currentTimeMillis();
+            for (double[] d : storage.getRoot())
+                for (Query q : this.queries)
+                    operation(q, d);
 
+            if (i != 0) total += (System.currentTimeMillis() - c);
+        }
+        long avg = total / (times - 1) / 1000;
+        if(Main.printResult) {
+            System.out.println("Result from executing queries in a batch:");
+            for (Query q : this.queries)  q.printResult();
+        }
+        System.out.println("Evaluate the queries in a batch, average run time: " + avg + "s." );
     }
 
-    /**
-     * Evaluate all queries, but one query at a time. Output the time taken.
-     */
-    void evaluateIndepently(){
+        /**
+         * Evaluate all queries, but one query at a time. Output the time taken.
+         */
+    void evaluateIndependently(){
+        int times = Main.numRun;
+        long total = 0;
         resetQueries();
-        long c = System.currentTimeMillis();
-        NaiveStorage storage = schema.getNaiveStorage();
-        for (Query q : this.queries) {
-            for(double[] d : storage.getRoot()) {
-                operation(q, d);
-            }
+        for(int i = 0; i < times; i ++){
+            long c = System.currentTimeMillis();
+            NaiveStorage storage = schema.getNaiveStorage();
+            for (Query q : this.queries)
+                for(double[] d : storage.getRoot())
+                    operation(q, d);
+            if(i != 0)  total += (System.currentTimeMillis() - c);
         }
-        if(Main.printResult)
-            for (Query q : this.queries) {
-                q.printResult();
-            }
-        System.out.println("Evaluate the query independently, run time: " + (System.currentTimeMillis() - c) + "ms." );
+        long avg = total / (times - 1) / 1000;
+        if(Main.printResult) {
+            System.out.println("Result from executing queries independently:");
+            for (Query q : this.queries)  q.printResult();
+        }
+        System.out.println("Evaluate the queries independently, average run time: " + avg + "s." );
     }
 
     /**
@@ -77,7 +85,7 @@ public class NaiveQueryBatch {
                 increment = parseSum(expr, str);
 
             } else {
-                // assume only one letter is selected, for example： select A, B, C from R
+                // assume only one letter is selected, for example: select A, B, C from R
                 increment = str[schema.fieldIndex(op)];
                 ifSet = true;
 

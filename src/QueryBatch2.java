@@ -251,7 +251,7 @@ public class QueryBatch2 {
                 increment = parseSum(expr, str, true);
 
             } else {
-                // assume only one letter is selected, for example： select A, B, C from R
+                // assume only one letter is selected, for example: select A, B, C from R
                 increment = str[schema.fieldIndex(op)];
                 ifSet = true;
 
