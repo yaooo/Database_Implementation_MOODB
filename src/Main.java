@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.IntStream;
@@ -10,9 +11,9 @@ public class Main {
     // modify this variable for other csv files
     private static List<String> FILENAMES = new LinkedList<>();
     private final static String[] attributes = new String[]{"A", "B", "C", "D", "E"};
-    private static String file_dir = "..//dataset";
+    private static String file_dir = "dataset";
     static boolean printResult = false;
-    static int numRun = 5; // By default, run each experiment 5 times
+    static int numRun = 2; // By default, run each experiment 5 times
     private static char section = 'a'; // By default, run section a of the benchmark
     private static boolean runAllSection = false;
 
@@ -24,30 +25,41 @@ public class Main {
             if (i == 2) printResult = Boolean.parseBoolean(args[1]);
         });
 
-        Files.list(Paths.get("."))
-                .forEach(System.out::println);
+        inputFileNames(1,20);
 
-        // read files from dataset/sf1.csv to dataset/sf20.csv
-//        inputFileNames(1,20);
+//        File dir = new File(file_dir);
+//        for (File file : Objects.requireNonNull(dir.listFiles())) {
+//            String filePath = file.getPath();
+//            if (file.isFile() && filePath.endsWith(".csv")) {
+//                FILENAMES.add(filePath);
+//                System.out.println(filePath);
+//            }
+//        }
+
+        section_3a();
 //        for(String f: FILENAMES){
 //            System.out.println("EXECUTING FILE: " + f);
 //            mooDBBenchMark(f);
-//            naiveDBBenchMark(f);
+////            naiveDBBenchMark(f);
 //        }
-//        System.out.print("\n\n");
+        System.out.print("\n\n");
     }
 
-//    public static void listFilesForFolder() {
-//        final File folder = new File(System.absfile_dir);
-//        folder.listFiles();
-//        for (final File fileEntry : folder.listFiles()) {
-//            System.out.println(fileEntry.getName());
-//        }
-//    }
 
 
-    private static void section_a(){
-
+    private static void section_3a() {
+        System.out.println("Running section 3a");
+        for (String f : FILENAMES) {
+            System.out.println("Testing file "+f+"...");
+            NaiveSchema schema = new NaiveSchema(f, Arrays.asList(attributes));
+            NaiveQueryBatch qb = new NaiveQueryBatch(schema);
+            // read queries
+            ArrayList<String> queries = inputQueries();
+            // read queries into query batch before processing further
+            qb.readQueries(queries);
+            qb.evaluateIndependently();
+            qb.evaluateBatch();
+        }
     }
 
     private static void naiveDBBenchMark(String f){

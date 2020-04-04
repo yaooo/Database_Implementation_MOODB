@@ -23,8 +23,8 @@ public class NaiveQueryBatch {
      * Evaluate batch query and output the time taken.
      */
     void evaluateBatch(){
-        int times = Main.numRun;
-        long total = 0;
+        double times = Main.numRun;
+        double total = 0;
         resetQueries();
         NaiveStorage storage = schema.getNaiveStorage();
         for(int i = 0; i < times; i ++) {
@@ -35,7 +35,7 @@ public class NaiveQueryBatch {
 
             if (i != 0) total += (System.currentTimeMillis() - c);
         }
-        long avg = total / (times - 1) / 1000;
+        double avg = total / (times - 1.0) / 1000.0;
         if(Main.printResult) {
             System.out.println("Result from executing queries in a batch:");
             for (Query q : this.queries)  q.printResult();
@@ -47,8 +47,8 @@ public class NaiveQueryBatch {
          * Evaluate all queries, but one query at a time. Output the time taken.
          */
     void evaluateIndependently(){
-        int times = Main.numRun;
-        long total = 0;
+        double times = Main.numRun;
+        double total = 0;
         resetQueries();
         for(int i = 0; i < times; i ++){
             long c = System.currentTimeMillis();
@@ -58,7 +58,7 @@ public class NaiveQueryBatch {
                     operation(q, d);
             if(i != 0)  total += (System.currentTimeMillis() - c);
         }
-        long avg = total / (times - 1) / 1000;
+        double avg = total / (times - 1.0) / 1000.0;
         if(Main.printResult) {
             System.out.println("Result from executing queries independently:");
             for (Query q : this.queries)  q.printResult();
