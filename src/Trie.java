@@ -14,21 +14,29 @@ class Trie {
 
     private TrieNode root;
     private int depth;
-    private long size; // directly return sum(1)
+
+    Trie(String fileName){
+        clear();
+        root = new TrieNode();
+        readData(fileName);
+    }
 
     Trie(String fileName, int depth) {
-        root = new TrieNode();
+        this(fileName);
         this.depth = depth;
-        size = 0;
-        readData(fileName);
+    }
+
+    private void clear(){
+        root = null;
+        depth = 0;
     }
 
     /**
      * Build the Trie given a filename
      **/
-    private void readData(String fileName){
+    public long readData(String fileName){
+        long c = System.currentTimeMillis();
         File text = new File(fileName);
-
         try {
             Scanner scanner = new Scanner(text);
             while(scanner.hasNextLine()){
@@ -39,6 +47,7 @@ class Trie {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        return System.currentTimeMillis() - c;
     }
 
 
@@ -93,18 +102,11 @@ class Trie {
      **/
     int getDepth(){return depth;}
 
-
     /**
      * Return if the Trie is empty
      * **/
     boolean isEmpty() {
         return root == null;
     }
-
-
-    /**
-     * Return the total number of tuples in the trie
-     * **/
-    long getSize(){return this.size;}
 
 }

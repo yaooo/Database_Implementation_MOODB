@@ -12,6 +12,13 @@ public class QueryBatch3{
     QueryBatch3(Schema schema){
         this.schema = schema;
         this.depth = this.schema.getAttributeOrder().size();
+        reset();
+    }
+
+    /**
+     * Reset the parameters of this object
+     */
+    private void reset(){
         this.queries = new ArrayList<>();
         this.version = 3;
         this.outermostQuery = null;
@@ -26,6 +33,7 @@ public class QueryBatch3{
      * @param queries list of queries in string
      */
     void readQueries(ArrayList<String> queries){
+        reset();
         for(String s: queries){
             s = s.toUpperCase();
             Query q = new Query(s);
@@ -91,14 +99,41 @@ public class QueryBatch3{
     /**
      * Evaluate batch query and output the time taken
      */
-    void evaluate(){
-        long c = System.currentTimeMillis();
-        traverse(this.schema.getTrie().getRoot(), 0, new double[depth] );
-        if(Main.printResult)
-            for(Query q: this.queries) {
-                q.printResult();
+    void evaluate(double times, boolean print){
+        double avg = 0;
+        for(int i = 0; i < times; i ++){
+
+            long c = System.currentTimeMillis();
+
+            traverse(this.schema.getTrie().getRoot(), 0, new double[depth]);
+
+            if(i == 0 && times == 1) avg = ((System.currentTimeMillis() - c) / 1000.0);
+            if(i != 0) avg += (System.currentTimeMillis() - c) / (times - 1.0) / 1000.0;
+            if(i == 0 && print){
+                for(Query q: this.queries) {
+                    q.printResult();
+                }
             }
-        System.out.println("Evaluate (MoonDB--version "+ version + "), run time: " + (System.currentTimeMillis() - c) + "ms." );
+        }
+        System.out.println("Evaluate MoonDB--version "+ version+ " in a batch, run time: " + avg + "s." );
+    }
+
+    /**
+     * Evaluate query independently and output the total time taken
+     */
+    double evaluateIndependently(){
+
+        long c = System.currentTimeMillis();
+        long diff = 0;
+        for(int i = 0; i < 5; i++) {
+            for (Query q : this.queries) {
+                traverseSingleQuery(this.schema.getTrie().getRoot(), 0, new double[depth], q);
+            }
+            if(i == 0) diff = System.currentTimeMillis();
+        }
+        double time = (System.currentTimeMillis() - diff) / 1000.0 / 4;
+        System.out.println("Evaluate (MoonDB--version "+ version + ") independently, run time: " +  time + "ms." );
+        return time;
     }
 
 
@@ -109,7 +144,7 @@ public class QueryBatch3{
      * **/
     private void traverse(Trie.TrieNode root, int level, double[] str){
         if(root == null || root.getChildren() == null || root.getChildren().isEmpty() || level == this.depth){
-            for(Query q: this.queries){
+            for(Query q: queries){
                 calculatePartial(q, str);// calculate par_aggs_gb
                 if(q.equals(innermostQuery)){
                     inner(q, str);
@@ -123,10 +158,33 @@ public class QueryBatch3{
                 str[level] = key;
                 traverse(next, level + 1, str);
 
-                for(Query q: this.queries){
+                for(Query q: queries){
                     calculate(q, str, level); // calculate aggs_gb
                 }
+            }
+        }
+    }
 
+
+    /**
+     * Traversing the whole trie:
+     * When it reaches the most bottom of the trie, start calculating the partial aggregates for each query
+     * Otherwise, perform calculations over the corresponding attributes accordingly at each level, reset the corresponding partial aggregates afterward
+     * **/
+    private void traverseSingleQuery(Trie.TrieNode root, int level, double[] str, Query q){
+        if(root == null || root.getChildren() == null || root.getChildren().isEmpty() || level == this.depth){
+            calculatePartial(q, str);// calculate par_aggs_gb
+            if(q.equals(innermostQuery)){
+                inner(q, str);
+            }
+            return;
+        }
+        for(double key: root.getChildren().keySet()){
+            Trie.TrieNode next = root.getChildren().get(key);
+            if(next != null){
+                str[level] = key;
+                traverseSingleQuery(next, level + 1, str, q);
+                calculate(q, str, level); // calculate aggs_gb
             }
         }
     }

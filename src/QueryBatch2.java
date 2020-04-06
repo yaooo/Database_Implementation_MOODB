@@ -12,7 +12,14 @@ public class QueryBatch2 {
 
     QueryBatch2(Schema schema){
         this.schema = schema;
-        this.depth = this.schema.getAttributeOrder().size();
+        this.depth = schema.getAttributeOrder().size();
+        reset();
+    }
+
+    /**
+     * Reset the parameters of this object
+     */
+    private void reset(){
         this.queries = new ArrayList<>();
         this.version = 2;
         this.outermostQuery = null;
@@ -27,6 +34,7 @@ public class QueryBatch2 {
      * @param queries list of queries in string
      */
     void readQueries(ArrayList<String> queries){
+        reset();
         for(String s: queries){
             s = s.toUpperCase();
             Query q = new Query(s);
@@ -92,14 +100,33 @@ public class QueryBatch2 {
     /**
      * Evaluate batch query and output the time taken
      */
-    void evaluate(){
-        long c = System.currentTimeMillis();
-        traverse(this.schema.getTrie().getRoot(), 0, new double[depth] );
-        if(Main.printResult)
-            for(Query q: this.queries) {
-                q.printResult();
+    void evaluate(double times, boolean print){
+        double avg = 0;
+        for(int i = 0; i < times; i ++){
+            long c = System.currentTimeMillis();
+            traverse(this.schema.getTrie().getRoot(), 0, new double[depth]);
+
+            if(i == 0 && times == 1) avg = ((System.currentTimeMillis() - c) / 1000.0);
+            if(i != 0) avg += (System.currentTimeMillis() - c) / (times - 1.0) / 1000.0;
+            if(i == 0 && print){
+                for(Query q: this.queries) {
+                    q.printResult();
+                }
             }
-        System.out.println("Evaluate (MoonDB--version "+ version + "), run time: " + (System.currentTimeMillis() - c) + "ms." );
+        }
+        System.out.println("Evaluate MoonDB--version "+ version+ " in a batch, run time: " + avg + "s." );
+    }
+
+    void evaluateIndependently(){
+        double avg = 0;
+        for(int i = 0; i < 5; i++) {
+            long c = System.currentTimeMillis();
+            for (Query q : this.queries) {
+                traverseSingleQuery(this.schema.getTrie().getRoot(), 0, new double[depth], q);
+            }
+            if(i != 0) avg += (System.currentTimeMillis() - c) / 1000.0 / 4;
+        }
+        System.out.println("Evaluate MoonDB--version "+ version+ " independently, run time: " + avg + "s." );
     }
 
     /**
@@ -134,6 +161,34 @@ public class QueryBatch2 {
 
 
     /**
+     * This is to help evaluate queries independently, as it will only process a single query
+     * Traversing the whole trie:
+     * When it reaches the most bottom of the trie, start calculating the partial aggregates for each query
+     * Otherwise, perform calculations over the corresponding attributes accordingly at each level, reset the corresponding partial aggregates afterward
+     * **/
+    private void traverseSingleQuery(Trie.TrieNode root, int level, double[] str, Query singleQuery){
+
+        if(root == null || root.getChildren() == null || root.getChildren().isEmpty() || level == this.depth){
+            calculatePartial(singleQuery, str);// calculate par_aggs_gb
+            if(singleQuery.getGroupBy_Field().equals(schema.getAttributeOrder().get(depth-1))){
+                inner(singleQuery, str);
+            }
+            return;
+        }
+        for(double key: root.getChildren().keySet()){
+            Trie.TrieNode next = root.getChildren().get(key);
+            if(next != null){
+                str[level] = key;
+                traverseSingleQuery(next, level + 1, str, singleQuery);
+                if(!singleQuery.getGroupBy_Field().equals(schema.getAttributeOrder().get(depth-1))) {
+                    calculate(singleQuery, str, level);
+                }
+            }
+        }
+    }
+
+
+    /**
      * Calculate the changes at the level of the trie corresponding to certain attribute
      * Update the return values of this query at this level of the trie (eg. update aggs_gb_b when level == 1)
      * Only update aggs at the very top level of the trie
@@ -161,7 +216,7 @@ public class QueryBatch2 {
                 } else if (op.contains("SUM")) { // SUM(B*C) , SUM(B)
                     increment = query.par_aggs[index];
                 }
-                query.updateField(-1, index, increment, ifset); // update the query return fields
+                query.updateField(key, index, increment, ifset); // update the query return fields
             }
             // reset par_aggs
             query.resetPartial();

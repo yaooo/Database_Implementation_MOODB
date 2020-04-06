@@ -8,6 +8,12 @@ class NaiveStorage {
     private int depth;
 
     NaiveStorage(String fileName, int depth) {
+        this(fileName);
+        this.depth = depth;
+    }
+
+    NaiveStorage(String fileName) {
+
         root = new LinkedList<>();
         readData(fileName);
     }

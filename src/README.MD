@@ -52,12 +52,22 @@ javac *.java
 java Main ../dataset a
 ```
 
-### And coding style tests
-
-Explain what these tests test and why
-
+### Benchmark Question 3.b
 ```
-Give an example
+java Main ../dataset a
 ```
 
+### Benchmark Question 3.c
+```
+java Main ../dataset a
+```
 
+### Benchmark Question 3.d
+```
+java Main ../dataset a
+```
+
+### Benchmark Question 3.e
+```
+java Main ../dataset a
+```

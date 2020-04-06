@@ -36,6 +36,7 @@ public class Query {
         this.par_aggs = new double[fieldSize];
         this.mark = new int[fieldSize];
         Arrays.fill(mark, -1);
+        resetPartial ();
     }
 
     /**
@@ -58,10 +59,12 @@ public class Query {
             double[] fields = (aggs_groupby.containsKey(key)) ? aggs_groupby.get(key) : new double[fieldSize];
             if(!ifSet){
                 fields[index] += increment;
+                aggs_groupby.put(key, fields);
             }else{
                 fields[index] = key;
+                aggs_groupby.putIfAbsent(key, fields);
             }
-            aggs_groupby.put(key, fields);
+//            aggs_groupby.put(key, fields);
         }
         if(type == GENERALQUERY){
             aggs[index] = ifSet ? increment: aggs[index] + increment;

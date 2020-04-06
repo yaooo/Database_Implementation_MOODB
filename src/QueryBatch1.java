@@ -17,6 +17,7 @@ public class QueryBatch1 {
      * Create query objects into a list
      */
     void readQueries(ArrayList<String> queries){
+        this.queries.clear();
         for(String s: queries){
             this.queries.add(new Query(s.toUpperCase()));
         }
@@ -25,15 +26,45 @@ public class QueryBatch1 {
     /**
      * Evaluate batch query and output the time taken
      */
-    void evaluate(){
-        long c = System.currentTimeMillis();
-        traverse(this.schema.getTrie().getRoot(), 0, new double[depth] );
-        if(Main.printResult)
-            for(Query q: this.queries) {
-                q.printResult();
+    void evaluate(double times, boolean print){
+        double avg = 0;
+        for(int i = 0; i < times; i ++){
+            for(Query q: queries){
+                q.resetQuery();
             }
-        System.out.println("Evaluate (MoonDB--version "+ version+ "), run time: " + (System.currentTimeMillis() - c) + "ms." );
+            long c = System.currentTimeMillis();
+            traverse(this.schema.getTrie().getRoot(), 0, new double[depth]);
+
+            if(i == 0 && times == 1) avg = ((System.currentTimeMillis() - c) / 1000.0);
+            if(i != 0) avg += (System.currentTimeMillis() - c) / (times - 1.0) / 1000.0;
+            if(i == 0 && print){
+                for(Query q: this.queries) {
+                    q.printResult();
+                }
+            }
+        }
+        System.out.println("Evaluate MoonDB--version "+ version+ " in a batch, run time: " + avg + "s." );
     }
+
+    /**
+     * Evaluate query independently and output the total time taken
+     */
+    void evaluateIndependently(){
+        long diff = 0;
+        for(int i = 0; i < 5; i++) {
+            for(Query q: queries){
+                q.resetQuery();
+            }
+            for (Query q : this.queries) {
+                traverseSingleQuery(this.schema.getTrie().getRoot(), 0, new double[depth], q);
+            }
+            if(i == 0) diff = System.currentTimeMillis();
+        }
+        double time = (System.currentTimeMillis() - diff) / 1000.0 / 4;
+        System.out.println("Evaluate (MoonDB--version "+ version + ") independently, run time: " +  time + "ms." );
+    }
+
+
 
     /**
      * Traversing through the trie, compute batch query only at the leaf node of the trie
@@ -53,6 +84,24 @@ public class QueryBatch1 {
             }
         }
     }
+
+    /**
+     * Traversing through the trie, compute batch query only at the leaf node of the trie
+     */
+    private void traverseSingleQuery(Trie.TrieNode root, int level, double[] str, Query q){
+        if(root == null || root.getChildren() == null || root.getChildren().isEmpty()){
+            operation(q, str);            // perform calculation
+            return;
+        }
+        for(double key: root.getChildren().keySet()){
+            Trie.TrieNode next = root.getChildren().get(key);
+            if(next != null){
+                str[level] = key;
+                traverseSingleQuery(next, level + 1, str, q);
+            }
+        }
+    }
+
 
     /**
      * Compute the return values for each tuple, and update return values for the query
