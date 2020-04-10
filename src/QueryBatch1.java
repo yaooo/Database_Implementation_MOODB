@@ -29,9 +29,7 @@ public class QueryBatch1 {
     void evaluate(double times, boolean print){
         double avg = 0;
         for(int i = 0; i < times; i ++){
-            for(Query q: queries){
-                q.resetQuery();
-            }
+
             long c = System.currentTimeMillis();
             traverse(this.schema.getTrie().getRoot(), 0, new double[depth]);
 
@@ -52,9 +50,7 @@ public class QueryBatch1 {
     void evaluateIndependently(){
         long diff = 0;
         for(int i = 0; i < 5; i++) {
-            for(Query q: queries){
-                q.resetQuery();
-            }
+
             for (Query q : this.queries) {
                 traverseSingleQuery(this.schema.getTrie().getRoot(), 0, new double[depth], q);
             }

@@ -162,7 +162,7 @@ public class Main {
         ArrayList<String> queries = inputQueries();
         // read queries into query
         qb.readQueries(queries);
-        qb.evaluateBatch(1, ifPrint);
+        qb.evaluateBatch(5, ifPrint);
     }
 
     /**
@@ -176,17 +176,17 @@ public class Main {
         // print out the result produced by MooDB-version 1
         QueryBatch1 qb1 = new QueryBatch1(schema);
         qb1.readQueries(queries);
-        qb1.evaluate(1, ifPrint);
+        qb1.evaluate(5, ifPrint);
 
         // print out the result produced by MooDB-version 2
         QueryBatch2 qb2 = new QueryBatch2(schema);
         qb2.readQueries(queries);
-        qb2.evaluate(1, ifPrint);
+        qb2.evaluate(5, ifPrint);
 
         // print out the result produced by MooDB-version 3
         QueryBatch3 qb3 = new QueryBatch3(schema);
         qb3.readQueries(queries);
-        qb3.evaluate(1, ifPrint);
+        qb3.evaluate(5, ifPrint);
     }
 
     // generate the names of all .csv files
@@ -221,3 +221,4 @@ public class Main {
         return queries;
     }
 }
+

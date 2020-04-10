@@ -2,7 +2,7 @@
 
 ### Prerequisites
 * Have Java installed.
-* Make sure the files are structured like this:
+* Make sure files are structured like this structure tree below:
 ```bash
 .
 ├── dataset
@@ -47,27 +47,41 @@ javac *.java
 
 ## Run the tests
 
-### Benchmark Question 3.a
+To check the query evaluation results for all .csv files, using NaiveDB, MooDB-v1, MooDB-v2, and MooDB-v3. 
+Print out the return values for each query, ordered by file name.
 ```
-java Main ../dataset a
-```
-
-### Benchmark Question 3.b
-```
-java Main ../dataset a
+java Main p
 ```
 
-### Benchmark Question 3.c
+
+To check the query evaluation results for all .csv files, using NaiveDB, MooDB-v1, MooDB-v2, and MooDB-v3.
+Not print out the return values but only the run time.
 ```
-java Main ../dataset a
+java Main
 ```
 
-### Benchmark Question 3.d
+
+Benchmark Question 3.a
 ```
-java Main ../dataset a
+java Main a
 ```
 
-### Benchmark Question 3.e
+Benchmark Question 3.b
 ```
-java Main ../dataset a
+java Main b
+```
+
+Benchmark Question 3.c
+```
+java Main c
+```
+
+Benchmark Question 3.d
+```
+java Main d
+```
+
+Benchmark Question 3.e
+```
+java Main e
 ```
