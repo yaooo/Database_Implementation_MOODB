@@ -34,7 +34,7 @@ public class QueryBatch3{
      */
     void readQueries(ArrayList<String> queries){
         reset();
-        for(String s: queries){
+        for(String s: queries){ // pre-processing the queries and add them to a list
             s = s.toUpperCase();
             Query q = new Query(s);
 
@@ -53,6 +53,8 @@ public class QueryBatch3{
 
         // handle the general query
         if(generalQuery != null && outermostQuery != null){
+            // if both non-group-by query and the outermostQuery are not null,
+            // we can then take advantage of the partial aggregates for the non-group-by query
             for(int index = 0; index < generalQuery.getFieldSize(); index++) {
                 String op = generalQuery.getFields().get(index);
 
@@ -65,7 +67,7 @@ public class QueryBatch3{
                 } else if (op.contains("SUM")) {
                     String expr = op.substring(4, op.length() - 1);
                     int i = ifOutermosterQueryContains(expr);
-                    if(i != -1) {
+                    if(i != -1) { // if the outermost query has the value that we can reuse
                         generalQuery.mark[index] = i;
                     }
                 }
@@ -81,11 +83,13 @@ public class QueryBatch3{
                 // if sum(1) does not exit, that means we cannot take advantage of partials
                 if(indexOfSum_1 == -1) continue;
 
+                // otherwise, try to decompose the aggregate
                 for(int index = 0; index < q.getFieldSize(); index++) {
                     String op = q.getFields().get(index);
 
                     if (!op.equals("SUM(1)") && op.contains("SUM")) {
                         String expr = op.substring(4, op.length() - 1);
+                        // if we can decompose this aggregate, then we mark it
                         if(schema.comparePriority(expr, groupByField)<0){
                             q.mark[index] = indexOfSum_1;
                         }
