@@ -1,11 +1,10 @@
 import java.util.List;
 public class Schema {
-
     private Trie trie;
-    private List<String> attributeOrder;
+    private List<String> attributeOrder; // A list of attrs(eg: <A, B, C, D, E>)
 
     Schema(String fileName, List<String> attrs){
-        attributeOrder = attrs; // eg: <A, B, C, D, E>
+        attributeOrder = attrs;
         trie = new Trie(fileName, attributeOrder.size());
     }
 
@@ -22,7 +21,7 @@ public class Schema {
     }
 
     /**
-     * @param i the index of an attribute in the schema
+     * @param i the index of an attribute in the attribute list
      * @return the attribute given its index in the schema
      */
     String getAttrByIndex(int i){
@@ -44,7 +43,8 @@ public class Schema {
     }
 
     /**
-     * return the index of attribute in the schema
+     * Because the attributes are stored as a list in the schema,
+     * this function returns the index of attribute in the list
      **/
     int fieldIndex(String s){
         return attributeOrder.indexOf(s);

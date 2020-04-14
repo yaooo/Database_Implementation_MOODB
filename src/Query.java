@@ -4,18 +4,22 @@ public class Query {
 
     private String query;
     private int fieldSize; // number of fields to be returned
-    private int type;
-    private HashMap<Double, double[]> aggs_groupby;
-    private double[] aggs;
-    private ArrayList<String> outputFieldNames;
-    private String GroupBy_Field;
+    private int type; //GROUPBYQUERY = 1; GENERALQUERY = 0;
+    private HashMap<Double, double[]> aggs_groupby; // store the output fields of a group-by query
+    private double[] aggs; // store the output fields of a non-group-by query
+    private ArrayList<String> outputFieldNames; // store the names of the output fields of a query
+    private String GroupBy_Field; // if a query is a group-by query, store its group-by field here
 
-    int[] mark;
-    double[] par_aggs;
+    int[] mark; // decide if a output field can be decomposed given an index
+    // used in the second and third implementation of MooDB
+
+    double[] par_aggs; // Partial aggregates for a query
+    // used in the second and third implementation of MooDB
 
     final static int GROUPBYQUERY = 1;
     final static int GENERALQUERY = 0;
 
+    // initialize a query
     Query(String s){
         s = s.toUpperCase();
         this.GroupBy_Field = "";
@@ -40,12 +44,11 @@ public class Query {
     }
 
     /**
-     * Reinitialize the partial aggregate array
+     * Reset the partial aggregate array
      */
     void resetPartial (){
         this.par_aggs = new double[fieldSize];
     }
-
 
     /**
      * Update the return values of the query
@@ -64,13 +67,11 @@ public class Query {
                 fields[index] = key;
                 aggs_groupby.putIfAbsent(key, fields);
             }
-//            aggs_groupby.put(key, fields);
         }
         if(type == GENERALQUERY){
             aggs[index] = ifSet ? increment: aggs[index] + increment;
         }
     }
-
 
     /**
      * Print the results of aggregates from this query
@@ -87,7 +88,6 @@ public class Query {
         }
     }
 
-
     /**
      * Determine the type of the query
      * Type 0: contains "GROUP BY"
@@ -96,7 +96,6 @@ public class Query {
     private int QueryType(String query){
         return query.contains("GROUP BY")? GROUPBYQUERY:GENERALQUERY;
     }
-
 
     /**
      * Parse the query, and store the information needed to identify the query
@@ -122,14 +121,12 @@ public class Query {
         }
     }
 
-
     /**
      * @return if this query contains the "GROUP BY" keyword
      */
     boolean isGroupBy(){
         return this.type == GROUPBYQUERY;
     }
-
 
     /**
      * Return the index of "SUM(1)" from the list of return fields
@@ -145,11 +142,15 @@ public class Query {
         return -1;
     }
 
+    // return a list of output fields
     ArrayList<String> getFields(){return outputFieldNames;}
 
+    // return the number of output fields
     int getFieldSize(){return fieldSize;}
 
+    // return the group-by field if this query is a group-by query, otherwise returns an empty string
     String getGroupBy_Field(){return GroupBy_Field;}
 
+    // return the type of this query: GROUPBYQUERY = 1; GENERALQUERY = 0;
     int getType(){return type;}
 }

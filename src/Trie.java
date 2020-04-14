@@ -26,6 +26,7 @@ class Trie {
         this.depth = depth;
     }
 
+    // clear the Trie
     private void clear(){
         root = null;
         depth = 0;
@@ -49,7 +50,6 @@ class Trie {
         }
         return System.currentTimeMillis() - c;
     }
-
 
     /**
      * Insert a tuple into the trie, update the max depth of the trie
@@ -77,6 +77,7 @@ class Trie {
         System.out.println(System.currentTimeMillis() - c);
     }
 
+    // A helper function for the function "displayAll()"
     private void display(TrieNode root, int level, double[] str){
         if(root == null || root.getChildren() == null || root.getChildren().isEmpty()){
             return;
@@ -91,22 +92,8 @@ class Trie {
         }
     }
 
-
     /**
      * Return the root of the trie
      */
     TrieNode getRoot(){return root;}
-
-    /**
-     * Get Max depth of the trie (# of variables in this schema)
-     **/
-    int getDepth(){return depth;}
-
-    /**
-     * Return if the Trie is empty
-     * **/
-    boolean isEmpty() {
-        return root == null;
-    }
-
 }

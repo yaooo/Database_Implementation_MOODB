@@ -24,7 +24,7 @@ public class QueryBatch1 {
     }
 
     /**
-     * Evaluate batch query and output the time taken
+     * Evaluate batch query 5 times in a batch and output the average time taken of the last four times
      */
     void evaluate(double times, boolean print){
         double avg = 0;
@@ -45,7 +45,7 @@ public class QueryBatch1 {
     }
 
     /**
-     * Evaluate query independently and output the total time taken
+     * Evaluate batch query 5 times independently and output the average time taken of the last four times
      */
     void evaluateIndependently(){
         long diff = 0;
@@ -61,9 +61,8 @@ public class QueryBatch1 {
     }
 
 
-
     /**
-     * Traversing through the trie, compute batch query only at the leaf node of the trie
+     * Traversing through the trie, compute a batch of queries at the leaf node of the trie
      */
     private void traverse(Trie.TrieNode root, int level, double[] str){
         if(root == null || root.getChildren() == null || root.getChildren().isEmpty()){
@@ -82,7 +81,7 @@ public class QueryBatch1 {
     }
 
     /**
-     * Traversing through the trie, compute batch query only at the leaf node of the trie
+     * Given a query, traversing through the trie, compute results at the leaf node of the trie
      */
     private void traverseSingleQuery(Trie.TrieNode root, int level, double[] str, Query q){
         if(root == null || root.getChildren() == null || root.getChildren().isEmpty()){
@@ -110,10 +109,10 @@ public class QueryBatch1 {
             String op = query.getFields().get(index);
             boolean ifSet = false; // for example, cases like "select A from R group by A", where we have to set B only
 
-            if (op.equals("SUM(1)")) {
+            if (op.equals("SUM(1)")) { // when select "SUM(1)"
                 increment = 1;
 
-            } else if (op.contains("SUM")) {
+            } else if (op.contains("SUM")) { // when select "SUM(expr)"
                 String expr = op.substring(4, op.length() - 1);
                 increment = parseSum(expr, str);
 
@@ -127,7 +126,7 @@ public class QueryBatch1 {
     }
 
     /**
-     * Calculate the sum of product for each increment: SUM(A*B), SUM(A*B*C), etc
+     * Calculate the increment for each SUM(EXPR): SUM(A*B), SUM(A), etc
      * */
     private double parseSum(String expr, double[] str){ // example: A*B
         double increment = 1;
