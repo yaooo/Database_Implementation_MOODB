@@ -138,15 +138,23 @@ public class Main {
             qb3.readQueries(queries);
             qb3.evaluate(5, false);
 
-            // run independently
-            QueryBatch3 qb33 = new QueryBatch3(schema);
-            qb33.readQueries(queries);
-            qb33.evaluateIndependently();
 
             // run only the aggs query
             System.out.print("Evaluate only the non-group-by query **");
             qb3.readQueries(query_aggs());
             qb3.evaluate(5, false);
+
+            // run independently
+            double time_independent = 0;
+            QueryBatch3 qb33 = new QueryBatch3(schema);
+            ArrayList<String> query_holder = new ArrayList<>();
+            for(String query: queries){
+                query_holder.clear();
+                query_holder.add(query);
+                qb33.readQueries(query_holder);
+                time_independent += qb33.evaluateIndependently();
+            }
+            System.out.println("Evaluate (MoonDB--version 3) independently, run time: " +  time_independent + "s." );
 
         }
     }

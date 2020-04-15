@@ -130,11 +130,12 @@ public class QueryBatch3{
         for(int i = 0; i < 5; i++) {
             for (Query q : this.queries) {
                 traverseSingleQuery(this.schema.getTrie().getRoot(), 0, new double[depth], q);
+//                if(i == 0)
+//                    q.printResult();
             }
             if(i == 0) diff = System.currentTimeMillis();
         }
         double time = (System.currentTimeMillis() - diff) / 1000.0 / 4;
-        System.out.println("Evaluate (MoonDB--version "+ version + ") independently, run time: " +  time + "ms." );
         return time;
     }
 
