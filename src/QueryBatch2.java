@@ -145,7 +145,7 @@ public class QueryBatch2 {
             for(Query q: this.queries){
                 calculatePartial(q, str);// calculate par_aggs_gb
                 if(q.getGroupBy_Field().equals(schema.getAttributeOrder().get(depth-1))){
-                    inner(q, str);
+                    inner(q, str); // directly calculate the most inner group-by query, when reaching the leaf of the Trie
                 }
             }
             return;
@@ -204,8 +204,11 @@ public class QueryBatch2 {
 
         double key = (query.isGroupBy()) ? str[indexOfKey] : 0;
 
-        if(query.getGroupBy_Field().equals(schema.getLastAttribute())) return; // groupby E
-        if(query.getType() == Query.GENERALQUERY && level == 0){ // groupby A or aggs
+        // the innermost loop is already handled elsewhere, skip calculating the inner most query
+        if(query.getGroupBy_Field().equals(schema.getLastAttribute())) return;
+
+        // handle the outermost query or the non-group-by query. eg. groupby_A or aggs
+        if(query.getType() == Query.GENERALQUERY && level == 0){
             double increment = 0;
             for(int index = 0; index < query.getFieldSize(); index++) {
                 String op = query.getFields().get(index);
@@ -224,23 +227,24 @@ public class QueryBatch2 {
                 }
                 query.updateField(key, index, increment, ifset); // update the query return fields
             }
-            // reset par_aggs
-            query.resetPartial();
+            query.resetPartial();// reset par_aggs
         }
-        else if(level == indexOfKey) { // any other group by
+        else if(level == indexOfKey) { // any other group-by-queries
 
             double increment = 0;
             for(int index = 0; index < query.getFieldSize(); index ++){
                 String op = query.getFields().get(index);
                 increment = query.par_aggs[index];
                 boolean ifset = (index == 0);
-                if(op.equals("SUM(1)"))
-                    increment = query.par_aggs[index];
+                if(op.equals("SUM(1)")) // sum(1)
+                    increment = query.par_aggs[index]; // directly get its partial aggregate value out
+
                 else if(op.contains("SUM")){
                     String expr = op.substring(4, op.length() - 1);
                     if(schema.comparePriority(expr, query.getGroupBy_Field()) < 0){
                         int i = schema.fieldIndex(expr);
                         increment = query.par_aggs[index] * str[i];
+                        // use its partial aggregates, compute the the value of EXPR
                     }
                 }
                 query.updateField(key, index, increment, ifset);

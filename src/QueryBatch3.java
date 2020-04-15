@@ -1,13 +1,13 @@
 import java.util.ArrayList;
 
 public class QueryBatch3{
-    private ArrayList<Query> queries;
-    private Schema schema;
-    private int depth;
-    private Query generalQuery;
-    private Query innermostQuery;
-    private Query outermostQuery;
+    private ArrayList<Query> queries; // list of queries
+    private Schema schema; // relation schema
+    private int depth; // number of attributes in the schema
     private int version;
+    private Query generalQuery; // non-group-by query
+    private Query innermostQuery;// group-by query with group-by field = last element of the attribute order
+    private Query outermostQuery; // group-by query with group-by field = first element of the attribute order
 
     QueryBatch3(Schema schema){
         this.schema = schema;
@@ -106,9 +106,7 @@ public class QueryBatch3{
     void evaluate(double times, boolean print){
         double avg = 0;
         for(int i = 0; i < times; i ++){
-
             long c = System.currentTimeMillis();
-
             traverse(this.schema.getTrie().getRoot(), 0, new double[depth]);
 
             if(i == 0 && times == 1) avg = ((System.currentTimeMillis() - c) / 1000.0);
@@ -151,7 +149,7 @@ public class QueryBatch3{
             for(Query q: queries){
                 calculatePartial(q, str);// calculate par_aggs_gb
                 if(q.equals(innermostQuery)){
-                    inner(q, str);
+                    inner(q, str);// directly calculate the most inner group-by query, when reaching the leaf of the Trie
                 }
             }
             return;
@@ -204,9 +202,10 @@ public class QueryBatch3{
 
         double key = (query.isGroupBy()) ? str[indexOfKey] : 0;
 
-        // the innermost loop is already handled elsewhere
+        // the innermost loop is already handled elsewhere, skip calculating the inner most query
         if(query.getGroupBy_Field().equals(schema.getLastAttribute())) return;
 
+        // handle the outermost query or the non-group-by query. eg. groupby_A or aggs
         if(query.getType() == Query.GENERALQUERY && level == 0){
             double increment = 0;
 
@@ -222,37 +221,38 @@ public class QueryBatch3{
                     ifset = true;
                 } else if(op.equals("SUM(1)")) { // select sum(1)
                     increment = (markedIndex == -1)? query.par_aggs[index]:increment;
-
+                    //  increment = query.par_aggs[index];
                 } else if (op.contains("SUM") && op.contains(schema.getAttrByIndex(0))) { // sum(A*B)
 
                     increment = str[0] * ((markedIndex != -1)? increment:query.par_aggs[index]);
-                    //  increment *= str[0] ----- increment = str[0] * query.par_aggs[index];
+                    //  increment *= str[0] --->> value_of_group_by_field * query.par_aggs[index];
+
                 } else if (op.contains("SUM")) { // SUM(B*C) , SUM(B)
                     increment = (markedIndex == -1) ? query.par_aggs[index] : increment;
+                    //  increment = query.par_aggs[index];
+
                 }
-                query.updateField(-1, index, increment, ifset);
+                query.updateField(-1, index, increment, ifset); // update the query return fields
             }
             query.resetPartial();// reset par_aggs
         }
-        else if(level == indexOfKey) {
+        else if(level == indexOfKey) {// any other group-by-queries
             double increment = 0;
             for(int index = 0; index < query.getFieldSize(); index ++){
                 String op = query.getFields().get(index);
-
                 boolean ifset = (index == 0);
 
-                if (query.mark[index] != -1) {
+                if (query.mark[index] != -1) { // locate the sharing partial aggregates
                     String expr = op.substring(4, op.length() - 1);
                     int i = schema.getAttributeOrder().indexOf(expr);
                     increment = query.par_aggs[query.mark[index]] * str[i];
-                }else
+                }else // or directly get it from its own partial aggregate
                     increment = query.par_aggs[index];
                 query.updateField(key, index, increment, ifset);
             }
             query.resetPartial();// reset par_aggs
         }
     }
-
 
     /**
      * Calculate the partial aggregates for each query,
